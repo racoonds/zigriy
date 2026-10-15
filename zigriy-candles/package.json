@@ -1,0 +1,10 @@
+{
+  "name": "zigriy-candles",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Лендинг пальмових свічок Zigriy з кошиком і відправкою замовлень у Telegram",
+  "type": "module",
+  "scripts": {
+    "dev": "vercel dev"
+  }
+}
