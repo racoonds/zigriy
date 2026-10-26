@@ -285,3 +285,25 @@ footer a{color:var(--gold);text-decoration:none;font-weight:800}
 /* місце під фіксовану смужку: висота задається з JS за повним розміром, тож при стисканні сторінка не стрибає */
 .topbar-space{height:var(--tb-h,118px)}
 html{scroll-padding-top:calc(var(--tb-h-compact,56px) + 8px)}
+/* Нова Пошта: місто, тип пункту, пункт */
+.ac{position:relative;display:grid;gap:5px}
+.ac>label,.np-type legend{font-size:13px;font-weight:800;color:var(--brown)}
+.order input:disabled{opacity:.6;cursor:not-allowed}
+.ac-list{position:absolute;z-index:5;top:100%;left:0;right:0;margin:4px 0 0;padding:4px;list-style:none;background:var(--card);border:1.5px solid var(--line);border-radius:12px;box-shadow:0 14px 30px -12px rgba(40,20,5,.35);max-height:260px;overflow:auto}
+.ac-list[hidden]{display:none}
+.ac-list li{padding:10px 12px;border-radius:9px;cursor:pointer;font-size:14px;line-height:1.35}
+.ac-list li b{font-weight:800;color:var(--brown-d)}
+.ac-list li small{display:block;color:var(--ink2);font-size:12.5px}
+.ac-list li.on,.ac-list li:hover{background:var(--gold-soft)}
+.ac-list li.note{cursor:default;color:var(--ink2);font-size:13px;background:none}
+.np-type{border:0;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.np-type legend{padding:0;margin-bottom:5px}
+.order .np-type label{display:block;position:relative;cursor:pointer}
+.np-type input{position:absolute;opacity:0;pointer-events:none}
+.np-type span{display:block;text-align:center;border:1.5px solid var(--line);background:var(--card);border-radius:12px;padding:11px 8px;font-size:14px;font-weight:800;color:var(--brown)}
+.np-type input:checked+span{border-color:var(--gold2);background:var(--gold-soft);color:var(--brown-d)}
+.np-type input:focus-visible+span{box-shadow:0 0 0 3px rgba(242,202,90,.45)}
+.order label.check{display:flex;align-items:flex-start;gap:10px;font-weight:700;font-size:14px;color:var(--ink);cursor:pointer}
+.order label.check input{width:20px;height:20px;margin:1px 0 0;flex:none;accent-color:var(--brown-d)}
+.totals .r .est{font-weight:800}
+.order .totals{margin:6px 0 0}
