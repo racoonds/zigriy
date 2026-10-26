@@ -48,7 +48,7 @@ config = re.sub(r'^export ', '', config, flags=re.M)
 render = re.sub(r'^import .*;\n', '', render, flags=re.M)
 render = re.sub(r'^export ', '', render, flags=re.M)
 app = sub_once("import { CONFIG as C, SCENTS, calc } from './config.js';", 'const C = CONFIG;', app, 'import config у app.js')
-app = sub_once("import { fmt, candles, hash, IMG, derive, setsHTML, groupsHTML } from './render.js';\n", '', app, 'import render у app.js')
+app = sub_once("import { fmt, plural, candles, hash, IMG, derive, setsHTML, groupsHTML } from './render.js';\n", '', app, 'import render у app.js')
 scents = {p.stem: data_uri(f'/assets/img/scents/{p.name}') for p in sorted((ROOT / 'assets/img/scents').glob('*.webp'))}
 img_map = ',\n'.join(f'  {k!r}: {v!r}' for k, v in scents.items())
 render = sub_once('const IMG = id => `/assets/img/scents/${id}.webp`;',

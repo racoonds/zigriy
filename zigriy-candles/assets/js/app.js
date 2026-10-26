@@ -1,5 +1,5 @@
 import { CONFIG as C, SCENTS, calc } from './config.js';
-import { fmt, candles, hash, IMG, derive, setsHTML, groupsHTML } from './render.js';
+import { fmt, plural, candles, hash, IMG, derive, setsHTML, groupsHTML } from './render.js';
 
 const $ = s => document.querySelector(s);
 const $$ = s => document.querySelectorAll(s);
@@ -112,6 +112,23 @@ function change(id, d) {
   render();
 }
 
+// кількість, вписана вручну (0–99)
+function setQty(id, raw) {
+  if (!SCENTS.some(s => s.id === id)) return;
+  const n = parseInt(raw, 10), was = cart[id] || 0;
+  if (Number.isNaN(n)) { render(); return; } // порожньо чи не число — повертаємо як було
+  const v = Math.max(0, Math.min(99, n));
+  if (v === was) { render(); return; }
+  if (v) cart[id] = v; else delete cart[id];
+  save();
+  if (v > was) { track('AddToCart'); toast(`${SCENTS.find(s => s.id === id).n}: ${v} шт`); }
+  render();
+}
+document.addEventListener('change', e => { const q = e.target.closest('[data-qty]'); if (q) setQty(q.dataset.qty, q.value); });
+document.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.matches('[data-qty]')) { e.preventDefault(); e.target.blur(); } });
+document.addEventListener('focusin', e => { if (e.target.matches('[data-qty]')) e.target.select(); });
+const setVal = (el, q) => { if (el && document.activeElement !== el) el.value = q; };
+
 function hintText(n) {
   const u = upsell(n), p = calc(n);
   if (u) return u.cheaper ? `+${u.add} шт → ${u.m} за ${fmt(u.total)}, дешевше!` : `+${u.add} шт → ${u.m} за ${fmt(u.total)}`;
@@ -125,9 +142,10 @@ function render() {
     const q = cart[el.dataset.id] || 0;
     el.classList.toggle('in', q > 0);
     el.querySelector('.cnt').textContent = q;
-    el.querySelector('.stepper span').textContent = q;
+    setVal(el.querySelector('.stepper .qty'), q);
   });
   $('#cartbar').classList.toggle('show', n > 0);
+  $('#howCta').textContent = n ? `Перейти до кошика · ${n} шт` : 'Обрати аромати';
   document.body.classList.toggle('has-cart', n > 0);
   $('#cbSum').innerHTML = `${n} шт · ${fmt(p.total)}${p.save ? `<s>${fmt(p.full)}</s>` : ''}`;
   $('#cbHint').textContent = hintText(n);
@@ -141,7 +159,7 @@ function renderModal() {
   if (!n) { if (!sent) closeModal(); return; }
   $('#mLines').innerHTML = SCENTS.filter(s => cart[s.id]).map(s => `
     <div class="line"><div class="n">${s.n}</div>
-    <div class="stepper"><button type="button" data-minus="${s.id}" aria-label="Менше: ${s.n}">−</button><span>${cart[s.id]}</span><button type="button" data-plus="${s.id}" aria-label="Більше: ${s.n}">+</button></div></div>`).join('');
+    <div class="stepper"><button type="button" data-minus="${s.id}" aria-label="Менше: ${s.n}">−</button><input class="qty" type="number" inputmode="numeric" min="0" max="99" data-qty="${s.id}" value="${cart[s.id]}" aria-label="Кількість: ${s.n}"><button type="button" data-plus="${s.id}" aria-label="Більше: ${s.n}">+</button></div></div>`).join('');
   const u = upsell(n);
   $('#mUpsell').textContent = u
     ? (u.cheaper
@@ -206,6 +224,7 @@ function closeModal() {
   lastFocus && lastFocus.focus && lastFocus.focus();
 }
 $('#cbBtn').onclick = openModal;
+$('#howCta').addEventListener('click', e => { if (count()) { e.preventDefault(); openModal(); } });
 document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal(); closeInfo(); } });
 
 /* ---------- опис і ноти аромату ---------- */
@@ -223,7 +242,7 @@ function openInfo(id) {
     ${rows.length ? `<div class="notes">${rows.map(([k, t]) => `<div class="note"><b>${t}</b><ul>${s.notes[k].map(n => `<li>${n}</li>`).join('')}</ul></div>`).join('')}</div>` : ''}
     <div class="info-meta">${C.VOLUME} · ${fmt(C.SINGLE_PRICE)} · 🕯️ горить ${C.BURN}</div>
     <button type="button" class="btn block" id="infoAdd" data-plus="${id}">+ Додати в кошик</button>
-    <div class="info-step" id="infoStep" hidden><button type="button" data-minus="${id}" aria-label="Менше: ${s.n}">−</button><span></span><button type="button" data-plus="${id}" aria-label="Більше: ${s.n}">+</button></div>`;
+    <div class="info-step" id="infoStep" hidden><button type="button" data-minus="${id}" aria-label="Менше: ${s.n}">−</button><input class="qty" type="number" inputmode="numeric" min="0" max="99" data-qty="${id}" aria-label="Кількість: ${s.n}"><button type="button" data-plus="${id}" aria-label="Більше: ${s.n}">+</button></div>`;
   $('#infoModal').classList.add('open'); document.body.style.overflow = 'hidden';
   $('#infoModal .sheet').scrollTop = 0;
   syncInfo();
@@ -240,7 +259,7 @@ function syncInfo() {
   if (!infoId) return;
   const q = cart[infoId] || 0, add = $('#infoAdd'), st = $('#infoStep'), a = document.activeElement;
   const wasAdd = a === add, wasStep = st.contains(a);
-  add.hidden = q > 0; st.hidden = !q; st.querySelector('span').textContent = q;
+  add.hidden = q > 0; st.hidden = !q; setVal(st.querySelector('.qty'), q);
   if (wasAdd && q) st.querySelector('[data-plus]').focus();
   else if (wasStep && !q) add.focus();
 }
@@ -508,10 +527,19 @@ $('#orderForm').addEventListener('submit', async e => {
 /* ---------- countdown ---------- */
 if (C.COUNTDOWN) {
   const pad = x => String(x).padStart(2, '0');
+  const end = new Date(C.PROMO_UNTIL).getTime();
+  let timerId;
   const tick = () => {
-    const now = new Date(), end = new Date(now); end.setHours(23, 59, 59, 999);
-    const s = Math.max(0, Math.floor((end - now) / 1000));
-    $('#cdH').textContent = pad(Math.floor(s / 3600)); $('#cdM').textContent = pad(Math.floor(s % 3600 / 60)); $('#cdS').textContent = pad(s % 60);
+    const s = Math.floor((end - Date.now()) / 1000);
+    if (s <= 0) { // акція скінчилась — ховаємо таймер, лишаємо смужку з доставкою
+      clearInterval(timerId);
+      $$('[data-countdown]').forEach(el => el.remove());
+      $('#topbar').classList.add('no-timer');
+      return;
+    }
+    const d = Math.floor(s / 86400);
+    $('#cdD').textContent = pad(d); $('#cdDl').textContent = plural(d, 'день', 'дні', 'днів');
+    $('#cdH').textContent = pad(Math.floor(s % 86400 / 3600)); $('#cdM').textContent = pad(Math.floor(s % 3600 / 60)); $('#cdS').textContent = pad(s % 60);
   };
   // при прокрутці таймер стає компактним. Пороги різні (згортаємо після 140px, розгортаємо вище 40px),
   // а місце під смужку не змінюється, тож вона більше не «смикається» туди-сюди
@@ -522,7 +550,7 @@ if (C.COUNTDOWN) {
   };
   addEventListener('scroll', onScroll, { passive: true });
   onScroll();
-  tick(); setInterval(tick, 1000);
+  timerId = setInterval(tick, 1000); tick();
 } else {
   $$('[data-countdown]').forEach(el => el.remove());
   $('#topbar').classList.add('no-timer');

@@ -61,7 +61,7 @@ export function groupsHTML() {
         <div class="pr">${C.VOLUME} · ${fmt(C.SINGLE_PRICE)}</div>
         <div class="burn">🕯️ горить ${C.BURN}</div>
         <button class="add" data-plus="${s.id}">+ Додати</button>
-        <div class="stepper"><button data-minus="${s.id}" aria-label="Менше: ${s.n}">−</button><span></span><button data-plus="${s.id}" aria-label="Більше: ${s.n}">+</button></div>
+        <div class="stepper"><button data-minus="${s.id}" aria-label="Менше: ${s.n}">−</button><input class="qty" type="number" inputmode="numeric" min="0" max="99" data-qty="${s.id}" aria-label="Кількість: ${s.n}"><button data-plus="${s.id}" aria-label="Більше: ${s.n}">+</button></div>
       </div>
     </div>`).join('')}</div>`).join('');
 }

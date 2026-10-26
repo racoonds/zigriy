@@ -27,7 +27,8 @@ export const CONFIG = {
   },
 
   FREE_SHIPPING_FROM: 1200,  // безкоштовна доставка від, грн
-  COUNTDOWN: true,           // таймер «ціни діють лише сьогодні» у шапці
+  COUNTDOWN: true,           // таймер до кінця акції у шапці
+  PROMO_UNTIL: '2026-11-01T00:00:00+02:00', // акція на набори діє до кінця 31 жовтня (за Києвом)
 };
 
 export const GROUPS = [

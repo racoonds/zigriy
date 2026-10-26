@@ -308,3 +308,9 @@ html{scroll-padding-top:calc(var(--tb-h-compact,56px) + 8px)}
 .order label.check input{width:20px;height:20px;margin:1px 0 0;flex:none;accent-color:var(--brown-d)}
 .totals .r .est{font-weight:800}
 .order .totals{margin:6px 0 0}
+/* кількість можна вписати вручну */
+.qty{width:46px;height:42px;border:0;background:transparent;text-align:center;font-family:inherit;font-weight:900;font-size:16px;line-height:1;color:var(--ink);-moz-appearance:textfield;appearance:textfield;padding:0;border-radius:8px}
+.qty::-webkit-outer-spin-button,.qty::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.qty:focus{outline:none;background:var(--card);box-shadow:0 0 0 2px var(--gold2)}
+.line .qty{width:34px;height:36px;font-size:14px}
+.info-step .qty{width:60px;height:52px;font-size:18px}
