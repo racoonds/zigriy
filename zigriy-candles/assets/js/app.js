@@ -1,16 +1,8 @@
-import { CONFIG as C, GROUPS, SCENTS, calc } from './config.js';
+import { CONFIG as C, SCENTS, calc } from './config.js';
+import { fmt, candles, hash, IMG, derive, setsHTML, groupsHTML } from './render.js';
 
 const $ = s => document.querySelector(s);
 const $$ = s => document.querySelectorAll(s);
-const fmt = n => n.toLocaleString('uk-UA').replace(/[\s,]/g, ' ') + ' грн';
-const plural = (n, one, few, many) => {
-  const m10 = n % 10, m100 = n % 100;
-  if (m10 === 1 && m100 !== 11) return one;
-  if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) return few;
-  return many;
-};
-const candles = n => plural(n, 'свічка', 'свічки', 'свічок');
-const IMG = id => `/assets/img/scents/${id}.webp`;
 
 /* ---------- pixels (вмикаються, лише якщо в config.js задано ID) ---------- */
 if (C.META_PIXEL_ID) {
@@ -51,19 +43,15 @@ function upsell(n) {
   return best;
 }
 
-/* ---------- static fills ---------- */
-const minSet = C.SETS.reduce((a, s) => (s.price / s.qty < a.price / a.qty ? s : a), C.SETS[0] || { qty: 1, price: C.SINGLE_PRICE });
-const minPer = Math.round(minSet.price / minSet.qty);
-const maxOff = Math.round((1 - minPer / C.SINGLE_PRICE) * 100);
-$('#heroMin').textContent = fmt(minPer);
+/* ---------- static fills (дефолти вже в HTML; JS лише актуалізує) ---------- */
+const D = derive();
+$('#heroMin').textContent = fmt(D.minPer);
 $('#heroOld').textContent = fmt(C.SINGLE_PRICE);
-$('#heroBadge').textContent = maxOff > 0 ? `−${maxOff}% у наборі` : '';
-$$('[data-free]').forEach(el => (el.textContent = fmt(C.FREE_SHIPPING_FROM)));
+$('#heroBadge').textContent = D.badge;
+$$('[data-free]').forEach(el => (el.textContent = D.free));
 $$('[data-volume]').forEach(el => (el.textContent = C.VOLUME));
-const freeFrom = (() => { for (let n = 1; n <= 50; n++) if (calc(n).total >= C.FREE_SHIPPING_FROM) return n; return null; })();
-$('#shipSub').textContent = freeFrom
-  ? `Тобто вже з ${freeFrom} ${plural(freeFrom, 'свічки', 'свічок', 'свічок')}. Відправляємо Новою Поштою`
-  : 'Відправляємо Новою Поштою';
+$$('[data-burn]').forEach(el => (el.textContent = C.BURN));
+$('#shipSub').textContent = D.shipSub;
 $('#yr').textContent = new Date().getFullYear();
 
 /* ---------- placeholder art (якщо фото не завантажилось) ---------- */
@@ -80,40 +68,16 @@ function candleSVG(c1, c2) {
 }
 window.__zph = (img, c1, c2) => { img.outerHTML = candleSVG(c1, c2); };
 
-/* ---------- render: sets ---------- */
-const setCards = [{ qty: 1, price: C.SINGLE_PRICE }, ...[...C.SETS].reverse()];
-const popular = C.SETS.length >= 2 ? C.SETS[1].qty : null;
-const best = minSet.qty;
-$('#setsGrid').innerHTML = setCards.map(s => {
-  const full = s.qty * C.SINGLE_PRICE, per = Math.round(s.price / s.qty);
-  const tag = s.qty === best && s.qty > 1 ? '<span class="tag dark">Найвигідніший</span>'
-    : s.qty === popular ? '<span class="tag">Найпопулярніший</span>' : '';
-  return `<div class="set ${s.qty === popular ? 'hot' : ''}">${tag}
-    <div class="q">${s.qty}</div><div class="ql">${candles(s.qty)}</div>
-    <div class="p">${fmt(s.price)}</div>
-    ${s.qty > 1 ? `<div class="o">${fmt(full)}</div>` : '<div class="o none">&nbsp;</div>'}
-    <div class="per">${per} грн / шт</div>
-    ${s.qty > 1 ? `<div class="save">економія ${fmt(full - s.price)}</div>` : ''}
-  </div>`;
-}).join('');
-
-/* ---------- render: scents ---------- */
-$('#groups').innerHTML = GROUPS.map(g => `
-  <div class="group-title">${g.t}${g.tag ? ` <small>${g.tag}</small>` : ''}</div>
-  <div class="grid">${SCENTS.filter(s => s.g === g.id).map(s => `
-    <div class="scent" data-id="${s.id}">
-      <div class="img">
-        <img src="${IMG(s.id)}" alt="Свічка Zigriy «${s.n}»" loading="lazy" width="800" height="800" onerror="__zph(this,'${s.c[0]}','${s.c[1]}')">
-        ${s.img2 ? `<img class="alt" src="${IMG(s.img2)}" alt="" loading="lazy" width="800" height="800" onerror="this.remove()">` : ''}
-        <span class="cnt"></span>
-      </div>
-      <div class="body">
-        <div class="nm">${s.n}</div><div class="ds">${s.d}</div>
-        <div class="pr">${C.VOLUME} · ${fmt(C.SINGLE_PRICE)}</div>
-        <button class="add" data-plus="${s.id}">+ Додати</button>
-        <div class="stepper"><button data-minus="${s.id}" aria-label="Менше: ${s.n}">−</button><span></span><button data-plus="${s.id}" aria-label="Більше: ${s.n}">+</button></div>
-      </div>
-    </div>`).join('')}</div>`).join('');
+/* ---------- sets + scents: перемальовуємо, лише якщо HTML застарів відносно config.js ---------- */
+const hydrate = (el, html) => { const h = hash(html); if (el.dataset.h !== h) { el.innerHTML = html; el.dataset.h = h; } };
+hydrate($('#setsGrid'), setsHTML());
+hydrate($('#groups'), groupsHTML());
+$('#groups').addEventListener('error', e => {
+  const im = e.target;
+  if (im.tagName !== 'IMG') return;
+  if (im.hasAttribute('data-opt')) im.remove(); else window.__zph(im, im.dataset.c1, im.dataset.c2);
+}, true);
+$$('#groups img:not([data-opt])').forEach(im => { if (im.complete && !im.naturalWidth) window.__zph(im, im.dataset.c1, im.dataset.c2); });
 
 /* ---------- cart ---------- */
 const CART_KEY = 'zigriy_cart';
@@ -168,11 +132,12 @@ function render() {
   $('#cbSum').innerHTML = `${n} шт · ${fmt(p.total)}${p.save ? `<s>${fmt(p.full)}</s>` : ''}`;
   $('#cbHint').textContent = hintText(n);
   if ($('#modal').classList.contains('open')) renderModal();
+  syncInfo();
 }
 
 function renderModal() {
   const n = count(), p = calc(n);
-  if (!n) { closeModal(); return; }
+  if (!n) { if (!sent) closeModal(); return; }
   $('#mLines').innerHTML = SCENTS.filter(s => cart[s.id]).map(s => `
     <div class="line"><div class="n">${s.n}</div>
     <div class="stepper"><button type="button" data-minus="${s.id}" aria-label="Менше: ${s.n}">−</button><span>${cart[s.id]}</span><button type="button" data-plus="${s.id}" aria-label="Більше: ${s.n}">+</button></div></div>`).join('');
@@ -195,10 +160,15 @@ document.addEventListener('click', e => {
   const pl = e.target.closest('[data-plus]'), mi = e.target.closest('[data-minus]');
   if (pl) change(pl.dataset.plus, 1);
   else if (mi) change(mi.dataset.minus, -1);
+  else if (e.target.closest('[data-info]')) openInfo(e.target.closest('[data-info]').dataset.info);
+  else if (e.target.closest('[data-info-close]') || e.target.id === 'infoModal') closeInfo();
   else if (e.target.closest('[data-close]') || e.target.id === 'modal') closeModal();
   // посилання саме відкриває Instagram, тут лише копіюємо список ароматів
   if (e.target.closest('[data-direct]')) {
-    if (count()) { copyText(orderText()); toast('Замовлення скопійовано, вставте його в Direct'); }
+    if (count() && !manualShown) {
+      if (copyText(orderText())) toast('Замовлення скопійовано, вставте його в Direct');
+      else { e.preventDefault(); showManual(orderText()); return; }  // in-app браузер заблокував копіювання
+    }
     track('Contact');
   }
 });
@@ -211,7 +181,7 @@ function toast(m) {
 }
 
 /* ---------- modal ---------- */
-let lastFocus = null;
+let lastFocus = null, sent = false;
 function openModal() {
   lastFocus = document.activeElement;
   $('#modal').classList.add('open'); document.body.style.overflow = 'hidden';
@@ -220,11 +190,49 @@ function openModal() {
 }
 function closeModal() {
   if (!$('#modal').classList.contains('open')) return;
+  if (sent) { sent = false; $('.sheet').classList.remove('sent'); $('#orderDone').hidden = true; }
   $('#modal').classList.remove('open'); document.body.style.overflow = '';
   lastFocus && lastFocus.focus && lastFocus.focus();
 }
 $('#cbBtn').onclick = openModal;
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal(); closeInfo(); } });
+
+/* ---------- опис і ноти аромату ---------- */
+let infoId = null, infoFocus = null;
+const NOTE_ROWS = [['top', 'Верхні ноти'], ['mid', 'Середні ноти'], ['base', 'Базові ноти']];
+function openInfo(id) {
+  const s = SCENTS.find(x => x.id === id);
+  if (!s) return;
+  infoId = id; infoFocus = document.activeElement;
+  const rows = NOTE_ROWS.filter(([k]) => s.notes && s.notes[k] && s.notes[k].length);
+  $('#infoTitle').textContent = s.n;
+  $('#infoBody').innerHTML = `
+    <img class="info-img" src="${IMG(id)}" alt="Свічка Zigriy «${s.n}»" width="800" height="800">
+    <p class="info-ds">${s.d}</p>
+    ${rows.length ? `<div class="notes">${rows.map(([k, t]) => `<div class="note"><b>${t}</b><ul>${s.notes[k].map(n => `<li>${n}</li>`).join('')}</ul></div>`).join('')}</div>` : ''}
+    <div class="info-meta">${C.VOLUME} · ${fmt(C.SINGLE_PRICE)} · 🕯️ горить ${C.BURN}</div>
+    <button type="button" class="btn block" id="infoAdd" data-plus="${id}">+ Додати в кошик</button>
+    <div class="info-step" id="infoStep" hidden><button type="button" data-minus="${id}" aria-label="Менше: ${s.n}">−</button><span></span><button type="button" data-plus="${id}" aria-label="Більше: ${s.n}">+</button></div>`;
+  $('#infoModal').classList.add('open'); document.body.style.overflow = 'hidden';
+  $('#infoModal .sheet').scrollTop = 0;
+  syncInfo();
+  $('#infoModal .x').focus();
+  try { window.fbq && fbq('track', 'ViewContent', { content_ids: [id], content_name: s.n, content_type: 'product', value: C.SINGLE_PRICE, currency: 'UAH' }); } catch (e) {}
+}
+function closeInfo() {
+  if (!infoId) return;
+  infoId = null; $('#infoModal').classList.remove('open'); document.body.style.overflow = '';
+  infoFocus && infoFocus.focus && infoFocus.focus();
+}
+// кнопка «Додати» стає лічильником; фокус не губиться
+function syncInfo() {
+  if (!infoId) return;
+  const q = cart[infoId] || 0, add = $('#infoAdd'), st = $('#infoStep'), a = document.activeElement;
+  const wasAdd = a === add, wasStep = st.contains(a);
+  add.hidden = q > 0; st.hidden = !q; st.querySelector('span').textContent = q;
+  if (wasAdd && q) st.querySelector('[data-plus]').focus();
+  else if (wasStep && !q) add.focus();
+}
 
 /* ---------- замовлення в Direct ---------- */
 function orderText() {
@@ -233,17 +241,104 @@ function orderText() {
     ...SCENTS.filter(s => cart[s.id]).map(s => `— ${s.n} × ${cart[s.id]}`),
     `Разом: ${n} шт, ${fmt(p.total)}`].join('\n');
 }
+let manualShown = false;
 function copyText(t) {
-  const legacy = () => {
-    const ta = document.createElement('textarea');
-    ta.value = t; ta.setAttribute('readonly', ''); ta.style.cssText = 'position:fixed;top:0;opacity:0';
-    document.body.appendChild(ta); ta.select();
-    try { document.execCommand('copy'); } catch (e) {}
-    ta.remove();
-  };
-  if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(t).catch(legacy);
-  else legacy();
+  const ta = document.createElement('textarea');
+  ta.value = t; ta.setAttribute('readonly', ''); ta.style.cssText = 'position:fixed;top:0;opacity:0';
+  document.body.appendChild(ta); ta.select(); ta.setSelectionRange(0, t.length);
+  let ok = false;
+  try { ok = document.execCommand('copy'); } catch (e) {}
+  ta.remove();
+  if (!ok && navigator.clipboard && isSecureContext) navigator.clipboard.writeText(t).catch(() => {});
+  return ok;
 }
+function showManual(t) {
+  manualShown = true;
+  const box = $('#mManual'), ta = box.querySelector('textarea');
+  ta.value = t; box.hidden = false; ta.focus(); ta.select();
+}
+
+/* ---------- швидке замовлення → /api/order → Telegram ---------- */
+const normPhone = v => { const d = v.replace(/\D/g, ''); return /^380\d{9}$/.test(d) ? '+' + d : /^0\d{9}$/.test(d) ? '+38' + d : null; };
+function sourceInfo() {
+  const q = new URLSearchParams(location.search), o = {};
+  for (const k of ['utm_source', 'utm_medium', 'utm_campaign']) if (q.get(k)) o[k] = q.get(k);
+  try { if (document.referrer) o.ref = new URL(document.referrer).hostname; } catch (e) {}
+  if (/Instagram/i.test(navigator.userAgent)) o.app = 'instagram';
+  return o;
+}
+$('#orderForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const v = Object.fromEntries(new FormData(e.target)), err = m => { const el = $('#orderErr'); el.textContent = m; el.hidden = !m; };
+  const phone = normPhone(v.phone || '');
+  if (!v.name.trim() || !v.city.trim() || !v.np.trim()) return err('Заповніть імʼя, місто та відділення Нової Пошти.');
+  if (!phone) return err('Введіть телефон у форматі +380XXXXXXXXX або 0XXXXXXXXX.');
+  err('');
+  const btn = $('#orderBtn'), label = btn.textContent;
+  btn.disabled = true; btn.textContent = 'Надсилаємо…';
+  const orderId = 'Z-' + Date.now().toString(36).toUpperCase().slice(-6);
+  try {
+    const r = await fetch('/api/order', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        orderId, firstName: v.name.trim(), phone, city: v.city.trim(), np: v.np.trim(),
+        instagram: v.instagram.trim(), contact: v.instagram.trim() ? 'Instagram' : 'Телефон', website: v.website,
+        items: SCENTS.filter(s => cart[s.id]).map(s => ({ id: s.id, qty: cart[s.id] })), source: sourceInfo(),
+      }),
+    });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok || !j.ok) throw new Error(j.error || r.status);
+    track('Purchase', {}, orderId);
+    sent = true;
+    for (const k of Object.keys(cart)) delete cart[k];
+    save(); render();
+    $('#orderDoneId').textContent = orderId;
+    $('.sheet').classList.add('sent'); $('#orderDone').hidden = false;
+  } catch (x) {
+    err('Не вдалося надіслати заявку. Спробуйте ще раз або напишіть нам у Direct.');
+  } finally {
+    btn.disabled = false; btn.textContent = label;
+  }
+});
+
+/* ---------- звук у hero ---------- */
+(function () {
+  const v = $('.hero-visual video'), btns = [$('#heroSound'), $('#heroSoundTop')].filter(Boolean);
+  if (!v || !btns.length) return;
+  const sync = () => btns.forEach(b => {
+    b.setAttribute('aria-pressed', !v.muted);
+    b.textContent = v.muted ? '🔊 Послухати тріскіт' : '🔇 Вимкнути звук';
+  });
+  const toggle = () => {
+    v.muted = !v.muted;
+    if (!v.muted) { v.volume = 1; v.play().catch(() => {}); }
+    sync();
+  };
+  $('#heroSound').onclick = toggle;
+  // на телефоні відео нижче тексту: показуємо його й одразу вмикаємо звук
+  const top = $('#heroSoundTop');
+  if (top) top.onclick = () => {
+    if (v.muted) $('.hero-visual').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    toggle();
+  };
+})();
+
+/* ---------- лайтбокс відгуків ---------- */
+(function () {
+  const rvs = [...$$('.rv')], lb = $('#lb'), img = $('#lbImg');
+  let cur = 0;
+  const show = i => { cur = (i + rvs.length) % rvs.length; const im = rvs[cur].querySelector('img'); img.src = im.currentSrc || im.src; img.alt = im.alt; };
+  const open = i => { show(i); lb.hidden = false; document.body.style.overflow = 'hidden'; $('.lb-x').focus(); };
+  const close = () => { if (lb.hidden) return; lb.hidden = true; document.body.style.overflow = ''; rvs[cur].focus(); };
+  rvs.forEach((b, i) => (b.onclick = () => open(i)));
+  $('#lbPrev').onclick = () => show(cur - 1);
+  $('#lbNext').onclick = () => show(cur + 1);
+  lb.addEventListener('click', e => { if (e.target === lb || e.target.closest('[data-lb-close]')) close(); });
+  document.addEventListener('keydown', e => {
+    if (lb.hidden) return;
+    if (e.key === 'Escape') close(); else if (e.key === 'ArrowLeft') show(cur - 1); else if (e.key === 'ArrowRight') show(cur + 1);
+  });
+})();
 
 /* ---------- відгуки ---------- */
 /* Стрілки гортають на одну картку, з кінця — на початок. Крапка = позиція прокрутки,
@@ -278,13 +373,35 @@ if (C.COUNTDOWN) {
     const s = Math.max(0, Math.floor((end - now) / 1000));
     $('#cdH').textContent = pad(Math.floor(s / 3600)); $('#cdM').textContent = pad(Math.floor(s % 3600 / 60)); $('#cdS').textContent = pad(s % 60);
   };
-  // при прокрутці таймер стає компактним, щоб не закривати сторінку
+  // при прокрутці таймер стає компактним. Пороги різні (згортаємо після 140px, розгортаємо вище 40px),
+  // а місце під смужку не змінюється, тож вона більше не «смикається» туди-сюди
   let tbC = false;
-  addEventListener('scroll', () => { const c = scrollY > 160; if (c !== tbC) { tbC = c; $('#topbar').classList.toggle('compact', c); } }, { passive: true });
+  const onScroll = () => {
+    const c = tbC ? scrollY > 40 : scrollY > 140;
+    if (c !== tbC) { tbC = c; $('#topbar').classList.toggle('compact', c); }
+  };
+  addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
   tick(); setInterval(tick, 1000);
 } else {
   $$('[data-countdown]').forEach(el => el.remove());
   $('#topbar').classList.add('no-timer');
 }
+
+/* висота місця під фіксовану смужку = її повна (не компактна) висота */
+(function () {
+  const tb = $('#topbar'), root = document.documentElement;
+  let full = 0, w = innerWidth;
+  // під час анімації висота проміжна, тому беремо максимум; скидаємо лише при зміні ширини екрана
+  const measure = () => {
+    const h = tb.offsetHeight;
+    if (tb.classList.contains('compact')) { root.style.setProperty('--tb-h-compact', h + 'px'); return; }
+    if (h > full) { full = h; root.style.setProperty('--tb-h', h + 'px'); }
+  };
+  measure();
+  addEventListener('resize', () => { if (innerWidth !== w) { w = innerWidth; full = 0; } measure(); });
+  document.fonts && document.fonts.ready.then(measure);
+  if (window.ResizeObserver) new ResizeObserver(measure).observe(tb);
+})();
 
 render();

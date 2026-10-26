@@ -7,6 +7,7 @@ import { CONFIG, SCENTS, calc } from '../assets/js/config.js';
 
 const esc = s => String(s ?? '').replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
 const clip = (s, n = 200) => String(s ?? '').trim().slice(0, n);
+const normPhone = v => { const d = v.replace(/\D/g, ''); return /^380\d{9}$/.test(d) ? '+' + d : /^0\d{9}$/.test(d) ? '+38' + d : ''; };
 const fmt = n => n.toLocaleString('uk-UA').replace(/[\s,]/g, ' ') + ' грн';
 
 export default async function handler(req, res) {
@@ -25,14 +26,14 @@ export default async function handler(req, res) {
   const order = {
     firstName: clip(b.firstName, 60),
     lastName: clip(b.lastName, 60),
-    phone: clip(b.phone, 20),
+    phone: normPhone(clip(b.phone, 20)),
     contact: clip(b.contact, 20) || 'Дзвінок',
     instagram: clip(b.instagram, 60),
     city: clip(b.city, 80),
     np: clip(b.np, 160),
     comment: clip(b.comment, 600),
   };
-  if (!/^\+380\d{9}$/.test(order.phone) || !order.firstName || !order.lastName || !order.city || !order.np) {
+  if (!/^\+380\d{9}$/.test(order.phone) || !order.firstName || !order.city || !order.np) {
     return res.status(400).json({ ok: false, error: 'Invalid contact data' });
   }
 
@@ -60,7 +61,7 @@ export default async function handler(req, res) {
     `Разом: ${n} шт — <b>${fmt(p.total)}</b>${p.save ? ` (знижка ${fmt(p.save)})` : ''}`,
     `Доставка: ${free ? 'безкоштовно' : 'за тарифами НП'}`,
     '',
-    `👤 ${esc(order.firstName)} ${esc(order.lastName)}`,
+    `👤 ${esc(`${order.firstName} ${order.lastName}`.trim())}`,
     `📞 ${esc(order.phone)}`,
     `💬 Звʼязок: ${esc(order.contact)}${order.instagram ? ` (${esc(order.instagram)})` : ''}`,
     `📍 ${esc(order.city)}, НП: ${esc(order.np)}`,
