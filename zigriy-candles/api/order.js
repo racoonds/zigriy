@@ -45,7 +45,7 @@ export default async function handler(req, res) {
   for (const it of Array.isArray(b.items) ? b.items : []) {
     const s = SCENTS.find(x => x.id === it?.id);
     const qty = Math.floor(Number(it?.qty));
-    if (s && qty > 0 && qty <= 99) items.push({ name: s.n, qty });
+    if (s && qty > 0 && qty <= CONFIG.MAX_PER_SCENT) items.push({ name: s.n, qty });
   }
   const n = items.reduce((a, i) => a + i.qty, 0);
   if (!n) return res.status(400).json({ ok: false, error: 'Empty cart' });

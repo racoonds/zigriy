@@ -84,7 +84,7 @@ const CART_KEY = 'zigriy_cart';
 const cart = {};
 try {
   const saved = JSON.parse(localStorage.getItem(CART_KEY) || '{}');
-  for (const [id, q] of Object.entries(saved)) if (SCENTS.some(s => s.id === id) && q > 0) cart[id] = Math.min(99, q | 0);
+  for (const [id, q] of Object.entries(saved)) if (SCENTS.some(s => s.id === id) && q > 0) cart[id] = Math.min(C.MAX_PER_SCENT, q | 0);
 } catch (e) {}
 const save = () => { try { localStorage.setItem(CART_KEY, JSON.stringify(cart)); } catch (e) {} };
 const count = () => Object.values(cart).reduce((a, b) => a + b, 0);
@@ -105,19 +105,19 @@ function track(ev, extra, eventID) {
 }
 
 function change(id, d) {
-  const was = cart[id] || 0, v = Math.max(0, Math.min(99, was + d));
+  const was = cart[id] || 0, v = Math.max(0, Math.min(C.MAX_PER_SCENT, was + d));
   if (v) cart[id] = v; else delete cart[id];
   save();
   if (d > 0) { track('AddToCart'); toast('Додано: ' + SCENTS.find(s => s.id === id).n); }
   render();
 }
 
-// кількість, вписана вручну (0–99)
+// кількість, вписана вручну (0…MAX_PER_SCENT)
 function setQty(id, raw) {
   if (!SCENTS.some(s => s.id === id)) return;
   const n = parseInt(raw, 10), was = cart[id] || 0;
   if (Number.isNaN(n)) { render(); return; } // порожньо чи не число — повертаємо як було
-  const v = Math.max(0, Math.min(99, n));
+  const v = Math.max(0, Math.min(C.MAX_PER_SCENT, n));
   if (v === was) { render(); return; }
   if (v) cart[id] = v; else delete cart[id];
   save();
@@ -159,7 +159,7 @@ function renderModal() {
   if (!n) { if (!sent) closeModal(); return; }
   $('#mLines').innerHTML = SCENTS.filter(s => cart[s.id]).map(s => `
     <div class="line"><div class="n">${s.n}</div>
-    <div class="stepper"><button type="button" data-minus="${s.id}" aria-label="Менше: ${s.n}">−</button><input class="qty" type="number" inputmode="numeric" min="0" max="99" data-qty="${s.id}" value="${cart[s.id]}" aria-label="Кількість: ${s.n}"><button type="button" data-plus="${s.id}" aria-label="Більше: ${s.n}">+</button></div></div>`).join('');
+    <div class="stepper"><button type="button" data-minus="${s.id}" aria-label="Менше: ${s.n}">−</button><input class="qty" type="number" inputmode="numeric" min="0" max="${C.MAX_PER_SCENT}" data-qty="${s.id}" value="${cart[s.id]}" aria-label="Кількість: ${s.n}"><button type="button" data-plus="${s.id}" aria-label="Більше: ${s.n}">+</button></div></div>`).join('');
   const u = upsell(n);
   $('#mUpsell').textContent = u
     ? (u.cheaper
@@ -242,7 +242,7 @@ function openInfo(id) {
     ${rows.length ? `<div class="notes">${rows.map(([k, t]) => `<div class="note"><b>${t}</b><ul>${s.notes[k].map(n => `<li>${n}</li>`).join('')}</ul></div>`).join('')}</div>` : ''}
     <div class="info-meta">${C.VOLUME} · ${fmt(C.SINGLE_PRICE)} · 🕯️ горить ${C.BURN}</div>
     <button type="button" class="btn block" id="infoAdd" data-plus="${id}">+ Додати в кошик</button>
-    <div class="info-step" id="infoStep" hidden><button type="button" data-minus="${id}" aria-label="Менше: ${s.n}">−</button><input class="qty" type="number" inputmode="numeric" min="0" max="99" data-qty="${id}" aria-label="Кількість: ${s.n}"><button type="button" data-plus="${id}" aria-label="Більше: ${s.n}">+</button></div>`;
+    <div class="info-step" id="infoStep" hidden><button type="button" data-minus="${id}" aria-label="Менше: ${s.n}">−</button><input class="qty" type="number" inputmode="numeric" min="0" max="${C.MAX_PER_SCENT}" data-qty="${id}" aria-label="Кількість: ${s.n}"><button type="button" data-plus="${id}" aria-label="Більше: ${s.n}">+</button></div>`;
   $('#infoModal').classList.add('open'); document.body.style.overflow = 'hidden';
   $('#infoModal .sheet').scrollTop = 0;
   syncInfo();

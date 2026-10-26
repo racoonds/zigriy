@@ -70,7 +70,7 @@ export default async function handler(req, res) {
     if (q.action === 'price') {
       const city = String(q.city || '');
       const n = Math.floor(Number(q.n));
-      if (!REF.test(city) || !(n > 0 && n <= 200)) return bad(res);
+      if (!REF.test(city) || !(n > 0 && n <= CONFIG.MAX_ORDER)) return bad(res);
       const j = await np('InternetDocument', 'getDocumentPrice', {
         CitySender: CONFIG.NP.SENDER_CITY,
         CityRecipient: city,
