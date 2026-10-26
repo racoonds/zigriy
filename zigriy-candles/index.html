@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Zigriy — пальмові свічки з тріскітом каміна</title>
-<meta name="description" content="Свічки ручної роботи з натурального пальмового воску з дерев'яним ґнотом, що потріскує, як камін. 200 мл, кришталевий візерунок, 8 ароматів. Набори зі знижкою.">
+<meta name="description" content="Свічки ручної роботи з натурального пальмового воску з дерев'яним ґнотом, що потріскує, як камін. 200 мл, 40+ годин горіння, кришталевий візерунок, 8 ароматів. Набори зі знижкою.">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Zigriy — пальмові свічки з тріскітом каміна">
 <meta property="og:description" content="Натуральний пальмовий віск, дерев'яний ґніт, кришталевий візерунок. Набори зі знижкою.">
@@ -27,8 +27,9 @@
     <div class="u"><span class="n" id="cdM">--</span><span class="l">хвилин</span></div><span class="c">:</span>
     <div class="u"><span class="n" id="cdS">--</span><span class="l">секунд</span></div>
   </div>
-  <div class="tb-s">🚚 Безкоштовна доставка від <span data-free></span></div>
+  <div class="tb-s">🚚 Безкоштовна доставка від <span data-free>1 200 грн</span></div>
 </div>
+<div class="topbar-space" id="tbSpace" aria-hidden="true"></div>
 
 <header class="hero">
   <div class="wrap">
@@ -36,24 +37,29 @@
       <img class="hero-logo" src="/assets/img/logo-gold.png" alt="Zigriy" width="120" height="186">
       <div class="brand">Zigriy · пальмові свічки</div>
       <h1>Свічка з <em>тріскітом</em> каміна</h1>
-      <p class="lead"><b>Натуральний пальмовий віск, дерев’яний ґніт, <span data-volume></span> ручної роботи 🔥</b><br>Під час горіння тихенько потріскує, як багаття, а на воску з’являється кришталевий візерунок, неповторний у кожної свічки ❄️</p>
+      <p class="lead"><b>Натуральний пальмовий віск, дерев’яний ґніт, <span data-volume>200 мл</span> ручної роботи 🔥</b><br>Під час горіння тихенько потріскує, як багаття, а на воску з’являється кришталевий візерунок, неповторний у кожної свічки ❄️</p>
       <div class="chips">
+        <span class="chip">🕯️ <span data-burn>40+ годин</span> горіння</span>
         <span class="chip">🌿 Без парафіну</span>
         <span class="chip">💨 Без диму</span>
         <span class="chip">✨ Сертифіковані аромаолії</span>
       </div>
       <div class="price-hero">
         <span class="from">у наборі від</span>
-        <span class="big" id="heroMin"></span>
-        <span class="old" id="heroOld"></span>
+        <span class="big" id="heroMin">358 грн</span>
+        <span class="old" id="heroOld">450 грн</span>
       </div>
+      <div class="hero-cta">
       <a href="#scents" class="btn">Обрати аромати
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
       </a>
+      <button type="button" class="btn ghost hero-sound-top" id="heroSoundTop" aria-pressed="false">🔊 Послухати тріскіт</button>
+      </div>
     </div>
     <div class="hero-visual">
       <video src="/assets/video/hero.mp4" poster="/assets/video/hero-poster.webp" autoplay muted loop playsinline preload="metadata" aria-label="Свічка Zigriy горить і потріскує"></video>
-      <span class="hero-badge" id="heroBadge"></span>
+      <span class="hero-badge" id="heroBadge">−20% у наборі</span>
+      <button type="button" class="hero-sound" id="heroSound" aria-pressed="false">🔊 Послухати тріскіт</button>
     </div>
   </div>
 </header>
@@ -79,7 +85,7 @@
       <div class="feat">
         <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21.2l8.8-8.8a5.5 5.5 0 0 0 0-7.8z"/></svg></div>
         <h3>Ручна робота</h3>
-        <p>Скляна баночка, дерев’яна кришечка і <span data-volume></span> затишку.</p>
+        <p>Скляна баночка, дерев’яна кришечка, <span data-volume>200 мл</span> затишку і <span data-burn>40+ годин</span> горіння.</p>
       </div>
     </div>
   </div>
@@ -89,11 +95,35 @@
   <div class="wrap">
     <h2>Чим більше свічок, тим нижча ціна!</h2>
     <p class="sub">Аромати в набір обираєте самі: можна різні, можна однакові.</p>
-    <div class="sets" id="setsGrid"></div>
+    <div class="sets" id="setsGrid" data-h="14dk75s"><div class="set ">
+    <div class="q">1</div><div class="ql">свічка</div>
+    <div class="p">450 грн</div>
+    <div class="o none">&nbsp;</div>
+    <div class="per">450 грн / шт</div>
+    
+  </div><div class="set ">
+    <div class="q">3</div><div class="ql">свічки</div>
+    <div class="p">1 250 грн</div>
+    <div class="o">1 350 грн</div>
+    <div class="per">417 грн / шт</div>
+    <div class="save">економія 100 грн</div>
+  </div><div class="set hot"><span class="tag">Найпопулярніший</span>
+    <div class="q">6</div><div class="ql">свічок</div>
+    <div class="p">2 350 грн</div>
+    <div class="o">2 700 грн</div>
+    <div class="per">392 грн / шт</div>
+    <div class="save">економія 350 грн</div>
+  </div><div class="set "><span class="tag dark">Найвигідніший</span>
+    <div class="q">12</div><div class="ql">свічок</div>
+    <div class="p">4 300 грн</div>
+    <div class="o">5 400 грн</div>
+    <div class="per">358 грн / шт</div>
+    <div class="save">економія 1 100 грн</div>
+  </div><!--/setsGrid--></div>
     <p class="sets-note">Ціна рахується в кошику автоматично: набирайте будь-яку кількість, і найвигідніший набір застосується сам.</p>
     <div class="ship-banner">
       <div class="truck"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 6h13v10H1zM14 10h4l3 3v3h-7"/><circle cx="5" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg></div>
-      <div><b>Безкоштовна доставка від <span data-free></span></b><br><span class="ship-sub" id="shipSub"></span></div>
+      <div><b>Безкоштовна доставка від <span data-free>1 200 грн</span></b><br><span class="ship-sub" id="shipSub">Тобто вже з 3 свічок. Відправляємо Новою Поштою</span></div>
     </div>
   </div>
 </section>
@@ -102,7 +132,131 @@
   <div class="wrap">
     <h2>Оберіть аромати</h2>
     <p class="sub">Натисніть «Додати» біля кожного аромату, який хочете, і кошик сам порахує ціну набору</p>
-    <div id="groups"></div>
+    <div id="groups" data-h="cohub1">
+  <div class="group-title">Осіння колекція <small>Новинка</small></div>
+  <div class="grid">
+    <div class="scent" data-id="teplyi-kruasan">
+      <div class="img">
+        <img src="/assets/img/scents/teplyi-kruasan.webp" alt="Свічка Zigriy «Теплий круасан»" loading="lazy" width="800" height="800" data-c1="#7a4c1c" data-c2="#f0c77a">
+        
+        <button type="button" class="info-btn" data-info="teplyi-kruasan" aria-label="Опис і ноти аромату «Теплий круасан»"><span>Ноти аромату</span></button>
+        <span class="cnt"></span>
+      </div>
+      <div class="body">
+        <div class="nm">Теплий круасан</div><div class="ds">Тепла здоба з медом, вершковим маслом і горіхами, з карамельним фіналом</div>
+        <div class="pr">200 мл · 450 грн</div>
+        <div class="burn">🕯️ горить 40+ годин</div>
+        <button class="add" data-plus="teplyi-kruasan">+ Додати</button>
+        <div class="stepper"><button data-minus="teplyi-kruasan" aria-label="Менше: Теплий круасан">−</button><span></span><button data-plus="teplyi-kruasan" aria-label="Більше: Теплий круасан">+</button></div>
+      </div>
+    </div>
+    <div class="scent" data-id="harbuzovyi-chai">
+      <div class="img">
+        <img src="/assets/img/scents/harbuzovyi-chai.webp" alt="Свічка Zigriy «Гарбузовий чай»" loading="lazy" width="800" height="800" data-c1="#7a3a14" data-c2="#e2873a">
+        <img class="alt" src="/assets/img/scents/harbuzovyi-chai-photo.webp" alt="" loading="lazy" width="800" height="800" data-opt>
+        <button type="button" class="info-btn" data-info="harbuzovyi-chai" aria-label="Опис і ноти аромату «Гарбузовий чай»"><span>Ноти аромату</span></button>
+        <span class="cnt"></span>
+      </div>
+      <div class="body">
+        <div class="nm">Гарбузовий чай</div><div class="ds">Гарячий чай з гарбузом, корицею та мʼякими прянощами</div>
+        <div class="pr">200 мл · 450 грн</div>
+        <div class="burn">🕯️ горить 40+ годин</div>
+        <button class="add" data-plus="harbuzovyi-chai">+ Додати</button>
+        <div class="stepper"><button data-minus="harbuzovyi-chai" aria-label="Менше: Гарбузовий чай">−</button><span></span><button data-plus="harbuzovyi-chai" aria-label="Більше: Гарбузовий чай">+</button></div>
+      </div>
+    </div>
+    <div class="scent" data-id="osinnii-krem">
+      <div class="img">
+        <img src="/assets/img/scents/osinnii-krem.webp" alt="Свічка Zigriy «Осінній крем»" loading="lazy" width="800" height="800" data-c1="#6b5a1c" data-c2="#e8d36a">
+        
+        <button type="button" class="info-btn" data-info="osinnii-krem" aria-label="Опис і ноти аромату «Осінній крем»"><span>Ноти аромату</span></button>
+        <span class="cnt"></span>
+      </div>
+      <div class="body">
+        <div class="nm">Осінній крем</div><div class="ds">Гарбузовий крем з корицею та гвоздикою, ванільно-вершкове тепло</div>
+        <div class="pr">200 мл · 450 грн</div>
+        <div class="burn">🕯️ горить 40+ годин</div>
+        <button class="add" data-plus="osinnii-krem">+ Додати</button>
+        <div class="stepper"><button data-minus="osinnii-krem" aria-label="Менше: Осінній крем">−</button><span></span><button data-plus="osinnii-krem" aria-label="Більше: Осінній крем">+</button></div>
+      </div>
+    </div>
+    <div class="scent" data-id="pryanyi-apelsyn">
+      <div class="img">
+        <img src="/assets/img/scents/pryanyi-apelsyn.webp" alt="Свічка Zigriy «Пряний апельсин»" loading="lazy" width="800" height="800" data-c1="#8a3a10" data-c2="#f09a3a">
+        <img class="alt" src="/assets/img/scents/pryanyi-apelsyn-photo.webp" alt="" loading="lazy" width="800" height="800" data-opt>
+        <button type="button" class="info-btn" data-info="pryanyi-apelsyn" aria-label="Опис і ноти аромату «Пряний апельсин»"><span>Ноти аромату</span></button>
+        <span class="cnt"></span>
+      </div>
+      <div class="body">
+        <div class="nm">Пряний апельсин</div><div class="ds">Теплий, трохи солодкий, з легкою пряною ноткою</div>
+        <div class="pr">200 мл · 450 грн</div>
+        <div class="burn">🕯️ горить 40+ годин</div>
+        <button class="add" data-plus="pryanyi-apelsyn">+ Додати</button>
+        <div class="stepper"><button data-minus="pryanyi-apelsyn" aria-label="Менше: Пряний апельсин">−</button><span></span><button data-plus="pryanyi-apelsyn" aria-label="Більше: Пряний апельсин">+</button></div>
+      </div>
+    </div></div>
+  <div class="group-title">Класика <small>Хіти</small></div>
+  <div class="grid">
+    <div class="scent" data-id="shokolad">
+      <div class="img">
+        <img src="/assets/img/scents/shokolad.webp" alt="Свічка Zigriy «Шоколад»" loading="lazy" width="800" height="800" data-c1="#3e261a" data-c2="#9a6a4a">
+        
+        <button type="button" class="info-btn" data-info="shokolad" aria-label="Опис і ноти аромату «Шоколад»"><span>Ноти аромату</span></button>
+        <span class="cnt"></span>
+      </div>
+      <div class="body">
+        <div class="nm">Шоколад</div><div class="ds">Насичений какао-аромат з мʼякою солодкою ноткою</div>
+        <div class="pr">200 мл · 450 грн</div>
+        <div class="burn">🕯️ горить 40+ годин</div>
+        <button class="add" data-plus="shokolad">+ Додати</button>
+        <div class="stepper"><button data-minus="shokolad" aria-label="Менше: Шоколад">−</button><span></span><button data-plus="shokolad" aria-label="Більше: Шоколад">+</button></div>
+      </div>
+    </div>
+    <div class="scent" data-id="vanil">
+      <div class="img">
+        <img src="/assets/img/scents/vanil.webp" alt="Свічка Zigriy «Ваніль»" loading="lazy" width="800" height="800" data-c1="#7a6a2a" data-c2="#f2e3a0">
+        
+        <button type="button" class="info-btn" data-info="vanil" aria-label="Опис і ноти аромату «Ваніль»"><span>Ноти аромату</span></button>
+        <span class="cnt"></span>
+      </div>
+      <div class="body">
+        <div class="nm">Ваніль</div><div class="ds">Тепла класична ваніль, ніжна і затишна</div>
+        <div class="pr">200 мл · 450 грн</div>
+        <div class="burn">🕯️ горить 40+ годин</div>
+        <button class="add" data-plus="vanil">+ Додати</button>
+        <div class="stepper"><button data-minus="vanil" aria-label="Менше: Ваніль">−</button><span></span><button data-plus="vanil" aria-label="Більше: Ваніль">+</button></div>
+      </div>
+    </div>
+    <div class="scent" data-id="harbuzovyi-pyrih">
+      <div class="img">
+        <img src="/assets/img/scents/harbuzovyi-pyrih.webp" alt="Свічка Zigriy «Гарбузовий пиріг»" loading="lazy" width="800" height="800" data-c1="#7a3a14" data-c2="#e2a07a">
+        
+        <button type="button" class="info-btn" data-info="harbuzovyi-pyrih" aria-label="Опис і ноти аромату «Гарбузовий пиріг»"><span>Ноти аромату</span></button>
+        <span class="cnt"></span>
+      </div>
+      <div class="body">
+        <div class="nm">Гарбузовий пиріг</div><div class="ds">Свіжа гарбузова випічка з корицею</div>
+        <div class="pr">200 мл · 450 грн</div>
+        <div class="burn">🕯️ горить 40+ годин</div>
+        <button class="add" data-plus="harbuzovyi-pyrih">+ Додати</button>
+        <div class="stepper"><button data-minus="harbuzovyi-pyrih" aria-label="Менше: Гарбузовий пиріг">−</button><span></span><button data-plus="harbuzovyi-pyrih" aria-label="Більше: Гарбузовий пиріг">+</button></div>
+      </div>
+    </div>
+    <div class="scent" data-id="dynia">
+      <div class="img">
+        <img src="/assets/img/scents/dynia.webp" alt="Свічка Zigriy «Диня»" loading="lazy" width="800" height="800" data-c1="#7a6a14" data-c2="#f0e06a">
+        
+        <button type="button" class="info-btn" data-info="dynia" aria-label="Опис і ноти аромату «Диня»"><span>Ноти аромату</span></button>
+        <span class="cnt"></span>
+      </div>
+      <div class="body">
+        <div class="nm">Диня</div><div class="ds">Соковита стигла диня, свіжий літній аромат</div>
+        <div class="pr">200 мл · 450 грн</div>
+        <div class="burn">🕯️ горить 40+ годин</div>
+        <button class="add" data-plus="dynia">+ Додати</button>
+        <div class="stepper"><button data-minus="dynia" aria-label="Менше: Диня">−</button><span></span><button data-plus="dynia" aria-label="Більше: Диня">+</button></div>
+      </div>
+    </div></div><!--/groups--></div>
   </div>
 </section>
 
@@ -128,40 +282,40 @@
   <div class="wrap">
     <div class="stars" aria-hidden="true">★★★★★</div>
     <h2>Відгуки наших клієнтів</h2>
-    <p class="sub">Справжні сторіс від покупців. Натисніть на будь-яку, щоб подивитися в нашому Instagram</p>
+    <p class="sub">Справжні сторіс від покупців. Натисніть на будь-яку, щоб відкрити на весь екран</p>
     <div class="rv-track" id="rvTrack">
-      <a class="rv" href="https://www.instagram.com/zigriy.candles/" target="_blank" rel="noopener"><img src="/assets/img/reviews/r1.webp" alt="Сторіс покупця зі свічкою «Ваніль»: «Супер гарні свічки від Zigriy»" loading="lazy" width="600" height="1067"></a>
-      <a class="rv" href="https://www.instagram.com/zigriy.candles/" target="_blank" rel="noopener"><img src="/assets/img/reviews/r5.webp" alt="Сторіс покупця зі свічкою «Смарагдове небо»: «Дякую за натуральні авторські свічки, які мають неймовірні аромати»" loading="lazy" width="600" height="1067"></a>
-      <a class="rv" href="https://www.instagram.com/zigriy.candles/" target="_blank" rel="noopener"><img src="/assets/img/reviews/r4.webp" alt="Відео покупця: свічка з ароматом гарбузового пирога і чай" loading="lazy" width="600" height="1066"></a>
-      <a class="rv" href="https://www.instagram.com/zigriy.candles/" target="_blank" rel="noopener"><img src="/assets/img/reviews/r6.webp" alt="Сторіс покупця зі свічкою «Пряний апельсин»: «Якісні свічки, які виготовляють в Дрогобичі. Справді зігрівають»" loading="lazy" width="600" height="1067"></a>
-      <a class="rv" href="https://www.instagram.com/zigriy.candles/" target="_blank" rel="noopener"><img src="/assets/img/reviews/r2.webp" alt="Сторіс покупця: «Прийшло дещо неймовірне»" loading="lazy" width="600" height="1067"></a>
-      <a class="rv" href="https://www.instagram.com/zigriy.candles/" target="_blank" rel="noopener"><img src="/assets/img/reviews/r7.webp" alt="Сторіс покупця: свічка «Гарбузовий чай» горить" loading="lazy" width="600" height="1067"></a>
-      <a class="rv" href="https://www.instagram.com/zigriy.candles/" target="_blank" rel="noopener"><img src="/assets/img/reviews/r8.webp" alt="Сторіс покупця зі свічкою «Гарбузовий пиріг»: «Привезли з Дрогобича і зігріли серденько»" loading="lazy" width="600" height="1067"></a>
-      <a class="rv" href="https://www.instagram.com/zigriy.candles/" target="_blank" rel="noopener"><img src="/assets/img/reviews/r3.webp" alt="Відео партнера: «Знаєш той запах, що нагадує дім?»" loading="lazy" width="600" height="1067"></a>
-      <a class="rv" href="https://www.instagram.com/zigriy.candles/" target="_blank" rel="noopener"><img src="/assets/img/reviews/r9.webp" alt="Сторіс покупця зі свічкою «Пряний апельсин»: «Затишок — це коли вогонь свічки танцює в очах»" loading="lazy" width="600" height="1067"></a>
-      <a class="rv" href="https://www.instagram.com/zigriy.candles/" target="_blank" rel="noopener"><img src="/assets/img/reviews/r10.webp" alt="Сторіс покупця зі свічкою «Смарагдове небо»: «Найкращі свічки тільки тут»" loading="lazy" width="600" height="1067"></a>
-      <a class="rv" href="https://www.instagram.com/zigriy.candles/" target="_blank" rel="noopener"><img src="/assets/img/reviews/r11.webp" alt="Сторіс покупця: свічка Zigriy горить біля гірлянди" loading="lazy" width="600" height="1067"></a>
-      <a class="rv" href="https://www.instagram.com/zigriy.candles/" target="_blank" rel="noopener"><img src="/assets/img/reviews/r12.webp" alt="Сторіс покупця зі свічкою «Теплий круасан»" loading="lazy" width="600" height="1067"></a>
-      <a class="rv" href="https://www.instagram.com/zigriy.candles/" target="_blank" rel="noopener"><img src="/assets/img/reviews/r13.webp" alt="Повідомлення покупця: «Посилку отримав, все дуже ароматне, все просто чудово»" loading="lazy" width="600" height="1067"></a>
+      <button type="button" class="rv" data-rv aria-label="Відкрити відгук на весь екран"><img src="/assets/img/reviews/r1.webp" alt="Сторіс покупця зі свічкою «Ваніль»: «Супер гарні свічки від Zigriy»" loading="lazy" width="600" height="1067"></button>
+      <button type="button" class="rv" data-rv aria-label="Відкрити відгук на весь екран"><img src="/assets/img/reviews/r5.webp" alt="Сторіс покупця зі свічкою «Смарагдове небо»: «Дякую за натуральні авторські свічки, які мають неймовірні аромати»" loading="lazy" width="600" height="1067"></button>
+      <button type="button" class="rv" data-rv aria-label="Відкрити відгук на весь екран"><img src="/assets/img/reviews/r4.webp" alt="Відео покупця: свічка з ароматом гарбузового пирога і чай" loading="lazy" width="600" height="1066"></button>
+      <button type="button" class="rv" data-rv aria-label="Відкрити відгук на весь екран"><img src="/assets/img/reviews/r6.webp" alt="Сторіс покупця зі свічкою «Пряний апельсин»: «Якісні свічки, які виготовляють в Дрогобичі. Справді зігрівають»" loading="lazy" width="600" height="1067"></button>
+      <button type="button" class="rv" data-rv aria-label="Відкрити відгук на весь екран"><img src="/assets/img/reviews/r2.webp" alt="Сторіс покупця: «Прийшло дещо неймовірне»" loading="lazy" width="600" height="1067"></button>
+      <button type="button" class="rv" data-rv aria-label="Відкрити відгук на весь екран"><img src="/assets/img/reviews/r7.webp" alt="Сторіс покупця: свічка «Гарбузовий чай» горить" loading="lazy" width="600" height="1067"></button>
+      <button type="button" class="rv" data-rv aria-label="Відкрити відгук на весь екран"><img src="/assets/img/reviews/r8.webp" alt="Сторіс покупця зі свічкою «Гарбузовий пиріг»: «Привезли з Дрогобича і зігріли серденько»" loading="lazy" width="600" height="1067"></button>
+      <button type="button" class="rv" data-rv aria-label="Відкрити відгук на весь екран"><img src="/assets/img/reviews/r9.webp" alt="Сторіс покупця зі свічкою «Пряний апельсин»: «Затишок — це коли вогонь свічки танцює в очах»" loading="lazy" width="600" height="1067"></button>
+      <button type="button" class="rv" data-rv aria-label="Відкрити відгук на весь екран"><img src="/assets/img/reviews/r10.webp" alt="Сторіс покупця зі свічкою «Смарагдове небо»: «Найкращі свічки тільки тут»" loading="lazy" width="600" height="1067"></button>
+      <button type="button" class="rv" data-rv aria-label="Відкрити відгук на весь екран"><img src="/assets/img/reviews/r11.webp" alt="Сторіс покупця: свічка Zigriy горить біля гірлянди" loading="lazy" width="600" height="1067"></button>
+      <button type="button" class="rv" data-rv aria-label="Відкрити відгук на весь екран"><img src="/assets/img/reviews/r12.webp" alt="Сторіс покупця зі свічкою «Теплий круасан»" loading="lazy" width="600" height="1067"></button>
+      <button type="button" class="rv" data-rv aria-label="Відкрити відгук на весь екран"><img src="/assets/img/reviews/r13.webp" alt="Повідомлення покупця: «Посилку отримав, все дуже ароматне, все просто чудово»" loading="lazy" width="600" height="1067"></button>
     </div>
     <div class="rv-nav" id="rvNav">
       <button class="rv-btn" id="rvPrev" aria-label="Попередній відгук">‹</button>
       <div class="rv-dots" id="rvDots"></div>
       <button class="rv-btn" id="rvNext" aria-label="Наступний відгук">›</button>
     </div>
+    <p class="rv-more"><a href="https://www.instagram.com/zigriy.candles/" target="_blank" rel="noopener">Більше відгуків у Highlights в Instagram</a></p>
   </div>
 </section>
 
 <section class="how-sec">
   <div class="wrap">
     <h2>Як замовити</h2>
-    <p class="sub">Замовлення приймаємо лише в Instagram Direct</p>
+    <p class="sub">Оформіть заявку на сайті за хвилину або напишіть нам у Direct</p>
     <div class="steps">
       <div class="step"><h3>Оберіть аромати</h3><p>Додайте в кошик потрібну кількість кожного аромату. Ціна набору застосується автоматично.</p></div>
-      <div class="step"><h3>Напишіть нам у Direct</h3><p>Натисніть «Замовити в Direct»: обрані аромати скопіюються, вам лишиться вставити їх у повідомлення.</p></div>
-      <div class="step"><h3>Менеджер підтвердить</h3><p>Уточнимо відділення Нової Пошти й оплату та відправимо замовлення.</p></div>
+      <div class="step"><h3>Залиште контакти</h3><p>У кошику вкажіть імʼя, телефон і відділення Нової Пошти: заявка одразу прийде нам. Або натисніть «Замовити в Direct»: аромати скопіюються, лишиться вставити їх у повідомлення.</p></div>
+      <div class="step"><h3>Менеджер підтвердить</h3><p>Звʼяжемося з вами, уточнимо оплату та відправимо замовлення Новою Поштою.</p></div>
     </div>
-    <div class="direct-cta"><a class="btn" href="https://www.instagram.com/zigriy.candles/" target="_blank" rel="noopener" data-direct><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r=".8" fill="currentColor"/></svg>Замовити в Direct</a></div>
+    <div class="direct-cta"><a class="btn" href="https://ig.me/m/zigriy.candles" target="_blank" rel="noopener" data-direct><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r=".8" fill="currentColor"/></svg>Замовити в Direct</a></div>
   </div>
 </section>
 
@@ -169,12 +323,13 @@
   <div class="wrap">
     <h2>Питання</h2>
     <div class="faq">
+      <details><summary>Скільки горить одна свічка?</summary><p>Свічка <span data-volume>200 мл</span> горить <span data-burn>40+ годин</span>, тож вистачає на багато затишних вечорів.</p></details>
       <details><summary>Чому свічка потріскує?</summary><p>Через дерев’яний ґніт. Під час горіння він тихенько тріщить, як дрова в каміні, — у цьому і є вся атмосфера Zigriy.</p></details>
       <details><summary>Звідки візерунок на воску?</summary><p>Так застигає натуральний пальмовий віск — кристалами, схожими на морозний візерунок. У кожної свічки він свій.</p></details>
       <details><summary>Можна в наборі різні аромати?</summary><p>Так. Ви самі обираєте аромати: хоч усі різні, хоч кілька однакових. Ціна залежить лише від кількості.</p></details>
       <details><summary>Чи безпечні свічки?</summary><p>Ми використовуємо пальмовий віск без парафіну, дерев’яний ґніт і сертифіковані аромаолії. Скляна конусна баночка стійка, і полум’я залишається всередині. Не залишайте свічку без нагляду, ставте на рівну негорючу поверхню, подалі від штор, паперу й дітей.</p></details>
-      <details><summary>Як оплатити?</summary><p>На сайті нічого оплачувати не потрібно. Замовлення приймаємо в Instagram Direct: там менеджер підтвердить його й узгодить з вами оплату.</p></details>
-      <details><summary>Скільки коштує доставка?</summary><p>Від <span data-free></span> доставка безкоштовна. Якщо сума менша, доставка за тарифами Нової Пошти.</p></details>
+      <details><summary>Як оплатити?</summary><p>На сайті нічого оплачувати не потрібно. Після заявки (з сайту чи в Instagram Direct) менеджер підтвердить замовлення й узгодить з вами оплату.</p></details>
+      <details><summary>Скільки коштує доставка?</summary><p>Від <span data-free>1 200 грн</span> доставка безкоштовна. Якщо сума менша, доставка за тарифами Нової Пошти.</p></details>
       <details data-countdown><summary>Ціни набору діятимуть завтра?</summary><p>Ціни на набори діють до кінця сьогоднішнього дня. Встигніть оформити замовлення, поки йде таймер угорі сторінки.</p></details>
     </div>
   </div>
@@ -184,7 +339,7 @@
   <img src="/assets/img/logo-gold.png" alt="Zigriy" width="84" height="130" class="foot-logo" loading="lazy">
   <p class="foot-tag">Натуральні свічки з кришталевим візерунком</p>
   <p>Instagram: <a href="https://www.instagram.com/zigriy.candles/" target="_blank" rel="noopener">@zigriy.candles</a> · <a href="https://www.threads.net/@zigriy.candles" target="_blank" rel="noopener">Threads</a></p>
-  <div class="foot-copy">© <span id="yr"></span> Zigriy</div>
+  <div class="foot-copy">© <span id="yr">2026</span> Zigriy</div>
 </footer>
 
 <!-- Cart bar -->
@@ -205,12 +360,48 @@
     <div class="lines" id="mLines"></div>
     <div class="upsell" id="mUpsell"></div>
     <div class="totals" id="mTotals"></div>
-    <a class="btn block" href="https://www.instagram.com/zigriy.candles/" target="_blank" rel="noopener" data-direct><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r=".8" fill="currentColor"/></svg>Замовити в Direct</a>
-    <p class="small">Замовлення приймаємо лише в Instagram Direct. Список ароматів скопіюється сам: вставте його в повідомлення, і менеджер усе підтвердить.</p>
+    <form class="order" id="orderForm" novalidate>
+      <h4>Швидке замовлення</h4>
+      <label>Імʼя та прізвище<input name="name" autocomplete="name" maxlength="100" required></label>
+      <label>Телефон<input name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="+380" maxlength="20" required></label>
+      <label>Місто<input name="city" autocomplete="address-level2" maxlength="80" required></label>
+      <label>Відділення Нової Пошти<input name="np" placeholder="Наприклад: відділення №5" maxlength="160" required></label>
+      <label><em>Нік в Instagram <span>(необовʼязково)</span></em><input name="instagram" autocapitalize="none" autocorrect="off" maxlength="60"></label>
+      <input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <p class="err" id="orderErr" role="alert" hidden></p>
+      <button class="btn block" id="orderBtn" type="submit">Підтвердити замовлення</button>
+    </form>
+    <div class="or"><span>або</span></div>
+    <a class="btn alt block" href="https://ig.me/m/zigriy.candles" target="_blank" rel="noopener" data-direct><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r=".8" fill="currentColor"/></svg>Замовити в Direct</a>
+    <p class="small">У Direct список ароматів скопіюється сам: вставте його в повідомлення, і менеджер усе підтвердить.</p>
+    <div class="manual" id="mManual" hidden><p>Не вдалося скопіювати автоматично. Скопіюйте текст нижче, потім ще раз натисніть «Замовити в Direct».</p><textarea readonly rows="5"></textarea></div>
+    <div class="done" id="orderDone" hidden>
+      <div class="ok">✓</div>
+      <h4>Дякуємо, замовлення <span id="orderDoneId"></span> прийнято!</h4>
+      <p>Менеджер звʼяжеться з вами найближчим часом, щоб підтвердити замовлення й узгодити оплату.</p>
+      <button type="button" class="btn block" data-close>Закрити</button>
+    </div>
   </div>
+</div>
+<!-- Опис і ноти аромату -->
+<div class="modal" id="infoModal" role="dialog" aria-modal="true" aria-labelledby="infoTitle">
+  <div class="sheet info">
+    <div class="sheet-h"><h3 id="infoTitle"></h3><button type="button" class="x" data-info-close aria-label="Закрити">×</button></div>
+    <div id="infoBody"></div>
+  </div>
+</div>
+<div class="lb" id="lb" role="dialog" aria-modal="true" aria-label="Відгук покупця" hidden>
+  <button type="button" class="lb-x" data-lb-close aria-label="Закрити">×</button>
+  <button type="button" class="lb-n" id="lbPrev" aria-label="Попередній відгук">‹</button>
+  <img id="lbImg" alt="">
+  <button type="button" class="lb-n" id="lbNext" aria-label="Наступний відгук">›</button>
 </div>
 <div class="toast" id="toast" role="status"></div>
 
 <script type="module" src="/assets/js/app.js"></script>
+<script>
+  window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+</script>
+<script defer src="/_vercel/insights/script.js"></script>
 </body>
 </html>
