@@ -412,6 +412,7 @@ async function updatePrice() {
 }
 
 /* ---------- швидке замовлення → /api/order → Telegram ---------- */
+const tooMany = () => `В одному замовленні максимум ${C.MAX_ORDER} свічок, а у вас ${count()} шт. Зменште кількість, будь ласка.`;
 const normPhone = v => { const d = v.replace(/\D/g, ''); return /^380\d{9}$/.test(d) ? '+' + d : /^0\d{9}$/.test(d) ? '+38' + d : null; };
 function sourceInfo() {
   const q = new URLSearchParams(location.search), o = {};
@@ -425,7 +426,7 @@ $('#orderForm').addEventListener('submit', async e => {
   const v = Object.fromEntries(new FormData(e.target)), err = m => { const el = $('#orderErr'); el.textContent = m; el.hidden = !m; };
   const phone = normPhone(v.phone || '');
   const point = fPoint.value.trim(), what = NP.type === 'P' ? 'поштомат' : 'відділення';
-  if (count() > C.MAX_ORDER) return err(`Через сайт можна замовити до ${C.MAX_ORDER} свічок. Для більшого замовлення напишіть нам у Direct: домовимося про ціну й доставку.`);
+  if (count() > C.MAX_ORDER) return err(tooMany());
   if (!v.name.trim()) return err('Вкажіть імʼя та прізвище.');
   if (!phone) return err('Введіть телефон у форматі +380XXXXXXXXX або 0XXXXXXXXX.');
   if (NP.manual ? !fCity.value.trim() : !NP.cityRef) return err(NP.manual ? 'Вкажіть місто.' : 'Оберіть місто зі списку підказок.');
@@ -456,7 +457,7 @@ $('#orderForm').addEventListener('submit', async e => {
     $('.sheet').classList.add('sent'); $('#orderDone').hidden = false;
   } catch (x) {
     const why = {
-      'Too many items': `Через сайт можна замовити до ${C.MAX_ORDER} свічок. Для більшого замовлення напишіть нам у Direct.`,
+      'Too many items': tooMany(),
       'Invalid contact data': 'Перевірте імʼя, телефон, місто та відділення.',
       'Empty cart': 'Кошик порожній. Додайте хоча б одну свічку.',
     }[x.message];
