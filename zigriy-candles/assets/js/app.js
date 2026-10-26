@@ -1,4 +1,4 @@
-import { CONFIG as C, SCENTS, calc } from './config.js';
+import { CONFIG as C, GROUPS, SCENTS, calc } from './config.js';
 import { fmt, plural, candles, hash, IMG, derive, setsHTML, groupsHTML } from './render.js';
 
 const $ = s => document.querySelector(s);
@@ -150,8 +150,8 @@ function render() {
   $('#cbSum').innerHTML = `${n} шт · ${fmt(p.total)}${p.save ? `<s>${fmt(p.full)}</s>` : ''}`;
   $('#cbHint').textContent = hintText(n);
   if ($('#modal').classList.contains('open')) renderModal();
-  syncInfo();
   updatePrice();
+  syncProduct();
 }
 
 function renderModal() {
@@ -189,8 +189,6 @@ document.addEventListener('click', e => {
   const pl = e.target.closest('[data-plus]'), mi = e.target.closest('[data-minus]');
   if (pl) change(pl.dataset.plus, 1);
   else if (mi) change(mi.dataset.minus, -1);
-  else if (e.target.closest('[data-info]')) openInfo(e.target.closest('[data-info]').dataset.info);
-  else if (e.target.closest('[data-info-close]') || e.target.id === 'infoModal') closeInfo();
   else if (e.target.closest('[data-close]') || e.target.id === 'modal') closeModal();
   // посилання саме відкриває Instagram, тут лише копіюємо список ароматів
   if (e.target.closest('[data-direct]')) {
@@ -225,44 +223,12 @@ function closeModal() {
 }
 $('#cbBtn').onclick = openModal;
 $('#howCta').addEventListener('click', e => { if (count()) { e.preventDefault(); openModal(); } });
-document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal(); closeInfo(); } });
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  if ($('#modal').classList.contains('open')) closeModal();
+  else if ($('#lb').hidden) closeProduct();
+});
 
-/* ---------- опис і ноти аромату ---------- */
-let infoId = null, infoFocus = null;
-const NOTE_ROWS = [['top', 'Верхні ноти'], ['mid', 'Середні ноти'], ['base', 'Базові ноти']];
-function openInfo(id) {
-  const s = SCENTS.find(x => x.id === id);
-  if (!s) return;
-  infoId = id; infoFocus = document.activeElement;
-  const rows = NOTE_ROWS.filter(([k]) => s.notes && s.notes[k] && s.notes[k].length);
-  $('#infoTitle').textContent = s.n;
-  $('#infoBody').innerHTML = `
-    <img class="info-img" src="${IMG(id)}" alt="Свічка Zigriy «${s.n}»" width="800" height="800">
-    <p class="info-ds">${s.d}</p>
-    ${rows.length ? `<div class="notes">${rows.map(([k, t]) => `<div class="note"><b>${t}</b><ul>${s.notes[k].map(n => `<li>${n}</li>`).join('')}</ul></div>`).join('')}</div>` : ''}
-    <div class="info-meta">${C.VOLUME} · ${fmt(C.SINGLE_PRICE)} · 🕯️ горить ${C.BURN}</div>
-    <button type="button" class="btn block" id="infoAdd" data-plus="${id}">+ Додати в кошик</button>
-    <div class="info-step" id="infoStep" hidden><button type="button" data-minus="${id}" aria-label="Менше: ${s.n}">−</button><input class="qty" type="number" inputmode="numeric" min="0" max="${C.MAX_PER_SCENT}" data-qty="${id}" aria-label="Кількість: ${s.n}"><button type="button" data-plus="${id}" aria-label="Більше: ${s.n}">+</button></div>`;
-  $('#infoModal').classList.add('open'); document.body.style.overflow = 'hidden';
-  $('#infoModal .sheet').scrollTop = 0;
-  syncInfo();
-  $('#infoModal .x').focus();
-  try { window.fbq && fbq('track', 'ViewContent', { content_ids: [id], content_name: s.n, content_type: 'product', value: C.SINGLE_PRICE, currency: 'UAH' }); } catch (e) {}
-}
-function closeInfo() {
-  if (!infoId) return;
-  infoId = null; $('#infoModal').classList.remove('open'); document.body.style.overflow = '';
-  infoFocus && infoFocus.focus && infoFocus.focus();
-}
-// кнопка «Додати» стає лічильником; фокус не губиться
-function syncInfo() {
-  if (!infoId) return;
-  const q = cart[infoId] || 0, add = $('#infoAdd'), st = $('#infoStep'), a = document.activeElement;
-  const wasAdd = a === add, wasStep = st.contains(a);
-  add.hidden = q > 0; st.hidden = !q; setVal(st.querySelector('.qty'), q);
-  if (wasAdd && q) st.querySelector('[data-plus]').focus();
-  else if (wasStep && !q) add.focus();
-}
 
 /* ---------- замовлення в Direct ---------- */
 function orderText() {
@@ -494,8 +460,10 @@ $('#orderForm').addEventListener('submit', async e => {
   const rvs = [...$$('.rv')], lb = $('#lb'), img = $('#lbImg');
   let cur = 0;
   const show = i => { cur = (i + rvs.length) % rvs.length; const im = rvs[cur].querySelector('img'); img.src = im.currentSrc || im.src; img.alt = im.alt; };
-  const open = i => { show(i); lb.hidden = false; document.body.style.overflow = 'hidden'; $('.lb-x').focus(); };
-  const close = () => { if (lb.hidden) return; lb.hidden = true; document.body.style.overflow = ''; rvs[cur].focus(); };
+  let back = null;
+  const open = i => { back = document.activeElement; show(i); lb.hidden = false; document.body.style.overflow = 'hidden'; $('.lb-x').focus(); };
+  const close = () => { if (lb.hidden) return; lb.hidden = true; document.body.style.overflow = ''; back && back.focus && back.focus({ preventScroll: true }); };
+  window.__openReview = open;
   rvs.forEach((b, i) => (b.onclick = () => open(i)));
   $('#lbPrev').onclick = () => show(cur - 1);
   $('#lbNext').onclick = () => show(cur + 1);
@@ -530,6 +498,154 @@ $('#orderForm').addEventListener('submit', async e => {
   addEventListener('resize', build);
   build();
 })();
+
+/* ---------- сторінка аромату: /aromat/<id> ---------- */
+const pv = $('#pv'), BASE_TITLE = document.title;
+let pvId = null, pvQty = 1, pvFocus = null;
+const NOTE_ROWS = [['top', 'Верхні ноти', 0], ['mid', 'Середні ноти', 1], ['base', 'Базові ноти', 2]];
+const PV_EXTRA = { shokolad: ["/assets/img/gallery/shokolad-cozy.webp"] }; // додаткові фото аромату
+const PV_ABOUT = [
+  ['Віск', 'натуральний пальмовий, без парафіну'],
+  ['Ґніт', 'деревʼяний, тихо потріскує, як камін'],
+  ['Обʼєм', () => C.VOLUME],
+  ['Горіння', () => C.BURN],
+  ['Аромат', 'сертифіковані аромаолії'],
+  ['Баночка', 'скляна, з деревʼяною кришечкою'],
+  ['Візерунок', 'кришталевий, у кожної свічки свій'],
+];
+// трикутник-піраміда: підсвічений рівень нот
+const tri = lvl => `<svg class="tri" viewBox="0 0 36 32" aria-hidden="true">
+  <path d="M18 2 23.7 12H12.3Z" class="${lvl === 0 ? 'on' : ''}"/><path d="M12.3 12h11.4l5.1 9H7.2Z" class="${lvl === 1 ? 'on' : ''}"/><path d="M7.2 21h21.6L34 30H2Z" class="${lvl === 2 ? 'on' : ''}"/></svg>`;
+
+function pvGallery(s) {
+  const slides = [IMG(s.id), ...(s.img2 ? [IMG(s.img2)] : []), ...(PV_EXTRA[s.id] || [])]
+    .map((src, i) => `<div class="pv-slide"><img src="${src}" alt="${i ? '' : `Свічка Zigriy «${s.n}»`}" width="800" height="800" ${i ? 'loading="lazy"' : ''}></div>`);
+  const v = $('.hero-visual video');
+  if (s.id === 'harbuzovyi-chai' && v) slides.push(`<div class="pv-slide"><video src="${v.currentSrc || v.src}" muted loop playsinline autoplay aria-label="Свічка «${s.n}» горить"></video></div>`);
+  return `<div class="pv-gal"><div class="pv-track" id="pvTrack">${slides.join('')}</div>${slides.length > 1 ? `<div class="pv-count"><span id="pvIdx">1</span> / ${slides.length}</div>` : ''}</div>`;
+}
+
+function pvReviews(s) {
+  const all = [...$$('.rv')];
+  const own = all.filter(b => b.dataset.scent === s.id);
+  const list = [...own, ...all.filter(b => !own.includes(b))].slice(0, 6); // спершу про цей аромат
+  return `<section class="pv-sec"><h2>Відгуки покупців</h2>${own.length ? `<p class="pv-hint">Спершу відгуки саме про «${s.n}»</p>` : ''}
+    <div class="pv-rvs">${list.map(b => { const im = b.querySelector('img'); return `<button type="button" class="pv-rv" data-rvi="${all.indexOf(b)}" aria-label="Відкрити відгук"><img src="${im.getAttribute('src')}" alt="${esc(im.alt)}" loading="lazy" width="600" height="1067"></button>`; }).join('')}</div></section>`;
+}
+
+function pvRelated(s) {
+  const others = SCENTS.filter(x => x.id !== s.id).sort((a, b) => (b.g === s.g) - (a.g === s.g));
+  return `<section class="pv-sec"><h2>Вам також сподобається</h2><div class="pv-rel">${others.map(x => `
+    <a class="pv-card" href="/aromat/${x.id}" data-pv="${x.id}"><img src="${IMG(x.id)}" alt="" loading="lazy" width="800" height="800"><b>${x.n}</b><span>${fmt(C.SINGLE_PRICE)}</span></a>`).join('')}</div></section>`;
+}
+
+function pvFaq() {
+  const pick = [...$$('.faq details')].filter(d => /доставка|оплатити|безпечні/i.test(d.querySelector('summary').textContent));
+  return pick.length ? `<section class="pv-sec"><h2>Питання</h2><div class="faq">${pick.map(d => d.outerHTML.replace(/\sopen(="")?/, '')).join('')}</div></section>` : '';
+}
+
+function renderProduct() {
+  const s = SCENTS.find(x => x.id === pvId), g = GROUPS.find(x => x.id === s.g) || {};
+  const rows = NOTE_ROWS.filter(([k]) => s.notes && s.notes[k] && s.notes[k].length);
+  const sets = [{ qty: 1, price: C.SINGLE_PRICE }, ...[...C.SETS].reverse()];
+  $('#pvBody').innerHTML = `
+    <nav class="crumbs" aria-label="Навігація"><a href="/" data-pv-close>Головна</a><span>/</span><a href="/#scents" data-pv-close>Аромати</a><span>/</span><span aria-current="page">${s.n}</span></nav>
+    <div class="pv-main">
+      ${pvGallery(s)}
+      <div class="pv-info">
+        ${g.t ? `<p class="pv-group">${g.t}${g.tag ? ` · ${g.tag}` : ''}</p>` : ''}
+        <h1 id="pvTitle" tabindex="-1">${s.n}</h1>
+        <p class="pv-meta">${C.VOLUME} · горить ${C.BURN}</p>
+        <div class="pv-price"><b>${fmt(C.SINGLE_PRICE)}</b><span>у наборі від ${fmt(D.minPer)} за штуку</span></div>
+        <p class="pv-ds">${s.d}</p>
+        <div class="pv-buy">
+          <div class="stepper pv-step"><button type="button" data-pvq="-1" aria-label="Менше">−</button><input class="qty" id="pvQty" type="number" inputmode="numeric" min="1" max="${C.MAX_PER_SCENT}" value="${pvQty}" aria-label="Кількість"><button type="button" data-pvq="1" aria-label="Більше">+</button></div>
+          <button type="button" class="btn" id="pvAdd">Додати в кошик</button>
+        </div>
+        <button type="button" class="btn alt block" id="pvNow">Замовити зараз</button>
+        <p class="pv-incart" id="pvInCart" aria-live="polite"></p>
+      </div>
+    </div>
+    ${rows.length ? `<section class="pv-sec"><h2>Ноти аромату</h2><div class="pv-notes">${rows.map(([k, t, l]) => `
+      <div class="pv-note">${tri(l)}<div><b>${t}</b><ul>${s.notes[k].map(n => `<li>${esc(n)}</li>`).join('')}</ul></div></div>`).join('')}</div></section>` : ''}
+    <section class="pv-sec"><h2>Про свічку</h2><dl class="pv-about">${PV_ABOUT.map(([k, v]) => `<div><dt>${k}</dt><dd>${typeof v === 'function' ? v() : v}</dd></div>`).join('')}</dl></section>
+    <section class="pv-sec"><h2>Чим більше, тим дешевше</h2><p class="pv-hint">Аромати в набір можна змішувати: ціна рахується від загальної кількості.</p>
+      <div class="pv-sets">${sets.map(x => `<div class="${x.qty === D.minSet.qty ? 'best' : ''}"><b>${x.qty} ${candles(x.qty)}</b><span>${fmt(x.price)}</span><small>${Math.round(x.price / x.qty)} грн / шт</small></div>`).join('')}</div></section>
+    ${pvReviews(s)}
+    ${pvRelated(s)}
+    ${pvFaq()}`;
+  $('#pvBar').innerHTML = `<div class="pv-bar-in"><div class="pv-bar-t"><b>${s.n}</b><span>${fmt(C.SINGLE_PRICE)} · ${C.VOLUME}</span></div><button type="button" class="btn" id="pvBarAdd">Додати в кошик</button></div>`;
+  const tr = $('#pvTrack');
+  if ($('#pvIdx')) tr.addEventListener('scroll', () => { $('#pvIdx').textContent = Math.round(tr.scrollLeft / tr.clientWidth) + 1; }, { passive: true });
+  syncProduct();
+}
+
+// лічильник кошика й «у кошику вже N шт» на сторінці аромату
+function syncProduct() {
+  if (!pvId) return;
+  const n = count(), q = cart[pvId] || 0;
+  $('#pvCartN').textContent = n || '';
+  $('#pvCart').setAttribute('aria-label', n ? `Кошик, ${n} шт` : 'Кошик порожній');
+  $('#pvInCart').textContent = q ? `У кошику вже ${q} шт цього аромату` : '';
+}
+
+function openProduct(id, push = true) {
+  const s = SCENTS.find(x => x.id === id);
+  if (!s) return;
+  if (!pvId) pvFocus = document.activeElement;
+  pvId = id; pvQty = 1;
+  renderProduct();
+  pv.hidden = false; document.body.classList.add('pv-open'); pv.scrollTop = 0;
+  document.title = `${s.n}: свічка Zigriy ${C.VOLUME}`;
+  if (push) { try { history.pushState({ pv: id }, '', '/aromat/' + id); } catch (e) {} }
+  $('#pvTitle').focus({ preventScroll: true });
+  try { window.fbq && fbq('track', 'ViewContent', { content_ids: [id], content_name: s.n, content_type: 'product', value: C.SINGLE_PRICE, currency: 'UAH' }); } catch (e) {}
+}
+
+function closeProduct(fromHistory = false) {
+  if (!pvId) return;
+  pvId = null;
+  pv.hidden = true; document.body.classList.remove('pv-open'); document.title = BASE_TITLE;
+  pv.querySelectorAll('video').forEach(v => v.pause());
+  if (!fromHistory) { try { if (history.state && history.state.pv) history.back(); else history.replaceState(null, '', '/'); } catch (e) {} }
+  pvFocus && pvFocus.focus && pvFocus.focus({ preventScroll: true });
+}
+
+addEventListener('popstate', e => { const id = e.state && e.state.pv; if (id) openProduct(id, false); else closeProduct(true); });
+
+const pvTake = () => { const v = parseInt($('#pvQty').value, 10); pvQty = Math.max(1, Math.min(C.MAX_PER_SCENT, v || 1)); $('#pvQty').value = pvQty; return pvQty; };
+pv.addEventListener('click', e => {
+  const t = e.target;
+  const q = t.closest('[data-pvq]');
+  if (q) { pvQty = Math.max(1, Math.min(C.MAX_PER_SCENT, pvTake() + +q.dataset.pvq)); $('#pvQty').value = pvQty; return; }
+  if (t.closest('#pvAdd, #pvBarAdd')) { change(pvId, pvTake()); return; }
+  if (t.closest('#pvNow')) { if (!cart[pvId]) change(pvId, pvTake()); openModal(); return; }
+  if (t.closest('#pvCart')) { if (count()) openModal(); else closeProduct(); return; }
+  const rv = t.closest('[data-rvi]');
+  if (rv) { window.__openReview(+rv.dataset.rvi); return; }
+  const cl = t.closest('[data-pv-close]');
+  if (cl) {
+    e.preventDefault();
+    const toScents = (cl.getAttribute('href') || '').includes('#scents') || cl.classList.contains('pv-back');
+    closeProduct();
+    if (toScents) setTimeout(() => $('#scents').scrollIntoView(), 0);
+  }
+});
+pv.addEventListener('change', e => { if (e.target.id === 'pvQty') pvTake(); });
+
+// посилання на аромат з каталогу й зі схожих ароматів
+document.addEventListener('click', e => {
+  const a = e.target.closest('[data-pv]');
+  if (!a || e.metaKey || e.ctrlKey || e.shiftKey) return;
+  e.preventDefault();
+  openProduct(a.dataset.pv);
+});
+
+// пряме посилання /aromat/<id>
+{
+  const m = location.pathname.match(/^\/aromat\/([\w-]+)\/?$/);
+  if (m && SCENTS.some(s => s.id === m[1])) { try { history.replaceState({ pv: m[1] }, '', location.pathname); } catch (e) {} openProduct(m[1], false); }
+}
 
 /* ---------- countdown ---------- */
 if (C.COUNTDOWN) {

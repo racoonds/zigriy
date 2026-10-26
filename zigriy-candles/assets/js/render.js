@@ -53,11 +53,11 @@ export function groupsHTML() {
       <div class="img">
         <img src="${IMG(s.id)}" alt="Свічка Zigriy «${s.n}»" loading="lazy" width="800" height="800" data-c1="${s.c[0]}" data-c2="${s.c[1]}">
         ${s.img2 ? `<img class="alt" src="${IMG(s.img2)}" alt="" loading="lazy" width="800" height="800" data-opt>` : ''}
-        <button type="button" class="info-btn" data-info="${s.id}" aria-label="Опис і ноти аромату «${s.n}»"><span>Ноти аромату</span></button>
+        <a class="info-btn" href="/aromat/${s.id}" data-pv="${s.id}" aria-label="Детальніше про аромат «${s.n}»"><span>Детальніше</span></a>
         <span class="cnt"></span>
       </div>
       <div class="body">
-        <div class="nm">${s.n}</div><div class="ds">${s.d}</div>
+        <a class="nm" href="/aromat/${s.id}" data-pv="${s.id}">${s.n}</a><div class="ds">${s.d}</div>
         <div class="pr">${C.VOLUME} · ${fmt(C.SINGLE_PRICE)}</div>
         <div class="burn">🕯️ горить ${C.BURN}</div>
         <button class="add" data-plus="${s.id}">+ Додати</button>

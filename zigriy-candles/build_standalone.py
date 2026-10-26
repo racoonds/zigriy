@@ -47,13 +47,13 @@ app = (ROOT / 'assets/js/app.js').read_text(encoding='utf-8')
 config = re.sub(r'^export ', '', config, flags=re.M)
 render = re.sub(r'^import .*;\n', '', render, flags=re.M)
 render = re.sub(r'^export ', '', render, flags=re.M)
-app = sub_once("import { CONFIG as C, SCENTS, calc } from './config.js';", 'const C = CONFIG;', app, 'import config у app.js')
+app = sub_once("import { CONFIG as C, GROUPS, SCENTS, calc } from './config.js';", 'const C = CONFIG;', app, 'import config у app.js')
 app = sub_once("import { fmt, plural, candles, hash, IMG, derive, setsHTML, groupsHTML } from './render.js';\n", '', app, 'import render у app.js')
 scents = {p.stem: data_uri(f'/assets/img/scents/{p.name}') for p in sorted((ROOT / 'assets/img/scents').glob('*.webp'))}
 img_map = ',\n'.join(f'  {k!r}: {v!r}' for k, v in scents.items())
 render = sub_once('const IMG = id => `/assets/img/scents/${id}.webp`;',
                f'const __IMG = {{\n{img_map}\n}};\nconst IMG = id => __IMG[id] || "";', render, 'IMG у render.js')
-js = (config + '\n' + render + '\n' + app).replace('</script', '<\\/script')
+js = inline_assets(config + '\n' + render + '\n' + app).replace('</script', '<\\/script')
 
 # Відео: як blob, бо Safari погано грає великі data:-відео
 video_js = """
