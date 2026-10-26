@@ -133,6 +133,7 @@ function render() {
   $('#cbHint').textContent = hintText(n);
   if ($('#modal').classList.contains('open')) renderModal();
   syncInfo();
+  updatePrice();
 }
 
 function renderModal() {
@@ -147,13 +148,23 @@ function renderModal() {
       ? `Вигідніше: додайте ще ${u.add} шт, і ${u.m} ${candles(u.m)} коштуватимуть ${fmt(u.total)}, це навіть менше, ніж зараз (${u.per} грн за штуку).`
       : `Порада: додайте ще ${u.add} шт, і вийде ${u.m} ${candles(u.m)} за ${fmt(u.total)}, тобто ${u.per} грн за штуку.`)
     : '';
+  renderTotals();
+}
+
+function renderTotals() {
+  const n = count(), p = calc(n);
+  if (!n || !$('#modal').classList.contains('open')) return;
   const free = p.total >= C.FREE_SHIPPING_FROM;
+  const ship = free ? '<span class="g">безкоштовно</span>'
+    : NP.price ? `<span class="est">≈ ${fmt(NP.price)}</span>`
+    : '<span>за тарифами перевізника</span>';
   $('#mTotals').innerHTML = `
     <div class="r"><span>${n} шт × ${C.SINGLE_PRICE} грн</span><span>${fmt(p.full)}</span></div>
     ${p.save ? `<div class="r g"><span>Знижка набору</span><span>−${fmt(p.save)}</span></div>` : ''}
-    <div class="r"><span>Доставка</span><span class="${free ? 'g' : ''}">${free ? 'безкоштовно' : 'за тарифами НП'}</span></div>
+    <div class="r"><span>Доставка${NP.cityRef ? ` (${NP.type === 'P' ? 'поштомат' : 'відділення'})` : ''}</span>${ship}</div>
+    ${!free && NP.price ? `<div class="r muted"><span>Орієнтовно, за тарифами Нової Пошти</span></div>` : ''}
     ${!free ? `<div class="r muted"><span>До безкоштовної доставки ще ${fmt(C.FREE_SHIPPING_FROM - p.total)}</span></div>` : ''}
-    <div class="r t"><span>До сплати</span><span>${fmt(p.total)}</span></div>`;
+    <div class="r t"><span>До сплати${!free ? ' за свічки' : ''}</span><span>${fmt(p.total)}</span></div>`;
 }
 
 document.addEventListener('click', e => {
@@ -258,6 +269,129 @@ function showManual(t) {
   ta.value = t; box.hidden = false; ta.focus(); ta.select();
 }
 
+/* ---------- Нова Пошта: місто → відділення або поштомат → ціна доставки ---------- */
+const NP = { cityRef: '', city: '', cityLabel: '', type: 'W', pointRef: '', point: '', manual: false, price: null, priceKey: '' };
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const debounce = (fn, ms) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; };
+async function npGet(params) {
+  const r = await fetch('/api/np?' + new URLSearchParams(params));
+  if (!r.ok) throw new Error('np ' + r.status);
+  return r.json();
+}
+const fCity = $('#fCity'), fPoint = $('#fPoint');
+const kindName = () => (NP.type === 'P' ? 'Поштомат' : 'Відділення');
+
+// Поле з випадним списком підказок: стрілки, Enter, Esc, мишка й дотик
+function combo(input, list, { load, render, pick }) {
+  let items = [], active = -1, seq = 0;
+  const open = on => { list.hidden = !on; input.setAttribute('aria-expanded', on); };
+  const paint = note => {
+    list.innerHTML = items.length
+      ? items.map((it, i) => `<li role="option" id="${list.id}-${i}" data-i="${i}" aria-selected="${i === active}" class="${i === active ? 'on' : ''}">${render(it)}</li>`).join('')
+      : `<li class="note">${note || 'Нічого не знайшли'}</li>`;
+    input.setAttribute('aria-activedescendant', active >= 0 ? `${list.id}-${active}` : '');
+    open(true);
+  };
+  const run = async () => {
+    const my = ++seq;
+    try {
+      const res = await load(input.value.trim());
+      if (my !== seq) return;
+      if (!res) { open(false); return; }
+      items = res.items; active = -1; paint(res.note);
+    } catch (e) {
+      if (my !== seq) return;
+      items = []; npFail(); paint('Список Нової Пошти зараз недоступний. Впишіть вручну');
+    }
+  };
+  const choose = i => { pick(items[i]); open(false); };
+  input.addEventListener('input', debounce(run, 250));
+  input.addEventListener('focus', () => { if (!input.disabled) run(); });
+  input.addEventListener('blur', () => setTimeout(() => open(false), 150));
+  input.addEventListener('keydown', e => {
+    if (list.hidden) return;
+    if ((e.key === 'ArrowDown' || e.key === 'ArrowUp') && items.length) {
+      e.preventDefault();
+      active = (active + (e.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length;
+      paint(); list.children[active].scrollIntoView({ block: 'nearest' });
+    } else if (e.key === 'Enter' && active >= 0) { e.preventDefault(); choose(active); }
+    else if (e.key === 'Escape') { e.stopPropagation(); open(false); }
+  });
+  list.addEventListener('mousedown', e => e.preventDefault()); // фокус лишається в полі
+  list.addEventListener('click', e => { const li = e.target.closest('[data-i]'); if (li) choose(+li.dataset.i); });
+  return { close: () => open(false) };
+}
+
+// API НП не відповідає — даємо вписати місто й відділення вручну, як раніше
+function npFail() {
+  if (NP.manual) return;
+  NP.manual = true;
+  fPoint.disabled = false;
+  fPoint.placeholder = 'Наприклад: відділення №5';
+}
+
+function resetPoint() { NP.pointRef = ''; NP.point = ''; fPoint.value = ''; pointCombo.close(); }
+
+const cityCombo = combo(fCity, $('#cityList'), {
+  load: async q => {
+    if (NP.manual || q.length < 2 || (NP.cityRef && q === NP.city)) return null;
+    const r = await npGet({ action: 'cities', q });
+    return { items: r.items, note: 'Такого міста не знайшли. Перевірте назву' };
+  },
+  render: c => `<b>${esc(c.name)}</b><small>${esc(c.label)}</small>`,
+  pick: c => {
+    Object.assign(NP, { cityRef: c.ref, city: c.name, cityLabel: c.label });
+    fCity.value = c.name;
+    resetPoint();
+    fPoint.disabled = false; fPoint.placeholder = 'Номер або вулиця';
+    updatePrice();
+    fPoint.focus();
+  },
+});
+fCity.addEventListener('input', () => {
+  if (!NP.cityRef) return;
+  Object.assign(NP, { cityRef: '', city: '', cityLabel: '' });
+  resetPoint();
+  if (!NP.manual) { fPoint.disabled = true; fPoint.placeholder = 'Спочатку оберіть місто'; }
+  updatePrice();
+});
+
+const pointCombo = combo(fPoint, $('#pointList'), {
+  load: async q => {
+    if (NP.manual || !NP.cityRef) return null;
+    if (NP.pointRef && q === NP.point) q = '';
+    const r = await npGet({ action: 'points', city: NP.cityRef, type: NP.type, q });
+    return {
+      items: r.items,
+      note: q ? 'Нічого не знайшли. Спробуйте номер або іншу вулицю' : `У цьому місті немає ${NP.type === 'P' ? 'поштоматів' : 'відділень'} Нової Пошти`,
+    };
+  },
+  render: p => `<b>${kindName()} №${esc(p.n)}</b>${p.kg ? ` · до ${p.kg} кг` : ''}<small>${esc(p.d)}</small>`,
+  pick: p => { NP.pointRef = p.ref; NP.point = `№${p.n}: ${p.d}`; fPoint.value = NP.point; },
+});
+fPoint.addEventListener('input', () => { NP.pointRef = ''; });
+
+$$('input[name="npType"]').forEach(r => r.addEventListener('change', () => {
+  NP.type = r.value;
+  $('#fPointLabel').textContent = NP.type === 'P' ? 'Поштомат Нової Пошти' : 'Відділення Нової Пошти';
+  resetPoint();
+  updatePrice();
+  if (NP.cityRef) fPoint.focus();
+}));
+
+// Орієнтовна вартість доставки з тарифів НП (лише коли доставка не безкоштовна)
+async function updatePrice() {
+  const n = count(), free = calc(n).total >= C.FREE_SHIPPING_FROM;
+  const key = NP.cityRef && n && !free ? `${NP.cityRef}|${NP.type}|${n}` : '';
+  if (key === NP.priceKey) return;
+  NP.priceKey = key; NP.price = null; renderTotals();
+  if (!key) return;
+  try {
+    const r = await npGet({ action: 'price', city: NP.cityRef, type: NP.type, n });
+    if (NP.priceKey === key) { NP.price = r.cost; renderTotals(); }
+  } catch (e) { /* лишаємо «за тарифами перевізника» */ }
+}
+
 /* ---------- швидке замовлення → /api/order → Telegram ---------- */
 const normPhone = v => { const d = v.replace(/\D/g, ''); return /^380\d{9}$/.test(d) ? '+' + d : /^0\d{9}$/.test(d) ? '+38' + d : null; };
 function sourceInfo() {
@@ -271,8 +405,12 @@ $('#orderForm').addEventListener('submit', async e => {
   e.preventDefault();
   const v = Object.fromEntries(new FormData(e.target)), err = m => { const el = $('#orderErr'); el.textContent = m; el.hidden = !m; };
   const phone = normPhone(v.phone || '');
-  if (!v.name.trim() || !v.city.trim() || !v.np.trim()) return err('Заповніть імʼя, місто та відділення Нової Пошти.');
+  const point = fPoint.value.trim(), what = NP.type === 'P' ? 'поштомат' : 'відділення';
+  if (!v.name.trim()) return err('Вкажіть імʼя та прізвище.');
   if (!phone) return err('Введіть телефон у форматі +380XXXXXXXXX або 0XXXXXXXXX.');
+  if (NP.manual ? !fCity.value.trim() : !NP.cityRef) return err(NP.manual ? 'Вкажіть місто.' : 'Оберіть місто зі списку підказок.');
+  if (NP.manual ? !point : !NP.pointRef) return err(NP.manual ? `Вкажіть ${what} Нової Пошти.` : `Оберіть ${what} зі списку.`);
+  const free = calc(count()).total >= C.FREE_SHIPPING_FROM;
   err('');
   const btn = $('#orderBtn'), label = btn.textContent;
   btn.disabled = true; btn.textContent = 'Надсилаємо…';
@@ -281,7 +419,9 @@ $('#orderForm').addEventListener('submit', async e => {
     const r = await fetch('/api/order', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        orderId, firstName: v.name.trim(), phone, city: v.city.trim(), np: v.np.trim(),
+        orderId, firstName: v.name.trim(), phone,
+        city: NP.cityLabel || fCity.value.trim(), np: point, npType: NP.type, noCall: !!v.noCall,
+        delivery: free ? '' : NP.price ? `≈ ${NP.price} грн` : '',
         instagram: v.instagram.trim(), contact: v.instagram.trim() ? 'Instagram' : 'Телефон', website: v.website,
         items: SCENTS.filter(s => cart[s.id]).map(s => ({ id: s.id, qty: cart[s.id] })), source: sourceInfo(),
       }),

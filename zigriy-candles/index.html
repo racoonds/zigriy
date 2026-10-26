@@ -364,9 +364,23 @@
       <h4>Швидке замовлення</h4>
       <label>Імʼя та прізвище<input name="name" autocomplete="name" maxlength="100" required></label>
       <label>Телефон<input name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="+380" maxlength="20" required></label>
-      <label>Місто<input name="city" autocomplete="address-level2" maxlength="80" required></label>
-      <label>Відділення Нової Пошти<input name="np" placeholder="Наприклад: відділення №5" maxlength="160" required></label>
+      <div class="ac">
+        <label for="fCity">Місто</label>
+        <input id="fCity" name="city" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="cityList" autocomplete="off" placeholder="Почніть вводити назву" maxlength="80" required>
+        <ul class="ac-list" id="cityList" role="listbox" aria-label="Міста" hidden></ul>
+      </div>
+      <fieldset class="np-type">
+        <legend>Як отримати</legend>
+        <label><input type="radio" name="npType" value="W" checked><span>Відділення</span></label>
+        <label><input type="radio" name="npType" value="P"><span>Поштомат</span></label>
+      </fieldset>
+      <div class="ac">
+        <label for="fPoint" id="fPointLabel">Відділення Нової Пошти</label>
+        <input id="fPoint" name="np" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="pointList" autocomplete="off" placeholder="Спочатку оберіть місто" maxlength="160" required disabled>
+        <ul class="ac-list" id="pointList" role="listbox" aria-label="Пункти Нової Пошти" hidden></ul>
+      </div>
       <label><em>Нік в Instagram <span>(необовʼязково)</span></em><input name="instagram" autocapitalize="none" autocorrect="off" maxlength="60"></label>
+      <label class="check"><input type="checkbox" name="noCall" id="fNoCall"><span>Не передзвонюйте мені, замовлення підтверджую</span></label>
       <input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
       <p class="err" id="orderErr" role="alert" hidden></p>
       <button class="btn block" id="orderBtn" type="submit">Підтвердити замовлення</button>

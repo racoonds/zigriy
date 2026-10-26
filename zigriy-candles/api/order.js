@@ -31,6 +31,9 @@ export default async function handler(req, res) {
     instagram: clip(b.instagram, 60),
     city: clip(b.city, 80),
     np: clip(b.np, 160),
+    npType: b.npType === 'P' ? 'Поштомат' : 'Відділення',
+    noCall: b.noCall === true,
+    delivery: clip(b.delivery, 30),
     comment: clip(b.comment, 600),
   };
   if (!/^\+380\d{9}$/.test(order.phone) || !order.firstName || !order.city || !order.np) {
@@ -59,12 +62,14 @@ export default async function handler(req, res) {
     '',
     ...items.map(i => `• ${esc(i.name)} × ${i.qty}`),
     `Разом: ${n} шт — <b>${fmt(p.total)}</b>${p.save ? ` (знижка ${fmt(p.save)})` : ''}`,
-    `Доставка: ${free ? 'безкоштовно' : 'за тарифами НП'}`,
+    `Доставка: ${free ? 'безкоштовно' : `за тарифами НП${order.delivery ? ` (${esc(order.delivery)}, орієнтовно)` : ''}`}`,
     '',
     `👤 ${esc(`${order.firstName} ${order.lastName}`.trim())}`,
     `📞 ${esc(order.phone)}`,
     `💬 Звʼязок: ${esc(order.contact)}${order.instagram ? ` (${esc(order.instagram)})` : ''}`,
-    `📍 ${esc(order.city)}, НП: ${esc(order.np)}`,
+    `📍 ${esc(order.city)}`,
+    `📦 ${order.npType} ${esc(order.np)}`,
+    order.noCall ? '✅ Не передзвонювати: клієнт підтвердив замовлення' : '📞 Передзвонити для підтвердження',
     order.comment ? `📝 ${esc(order.comment)}` : null,
     src ? `🔗 ${esc(src)}` : null,
   ].filter(l => l !== null).join('\n');
