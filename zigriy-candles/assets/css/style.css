@@ -227,7 +227,8 @@ footer a{color:var(--gold);text-decoration:none;font-weight:800}
   *{transition:none!important}
 }
 
-/* звук у hero */
+/* звук у hero. Кнопки тимчасово сховані атрибутом hidden в index.html — приберіть його, щоб повернути */
+.hero-sound[hidden],.hero-sound-top[hidden]{display:none}
 .hero-sound{position:absolute;left:14px;bottom:14px;background:rgba(25,16,10,.72);color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:99px;padding:11px 16px;font:800 14px/1 var(--body,inherit);cursor:pointer;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
 .hero-sound:hover{background:rgba(25,16,10,.88)}
 .hero-sound:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
