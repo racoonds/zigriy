@@ -48,7 +48,8 @@ export default async function handler(req, res) {
     if (s && qty > 0 && qty <= 99) items.push({ name: s.n, qty });
   }
   const n = items.reduce((a, i) => a + i.qty, 0);
-  if (!n || n > 500) return res.status(400).json({ ok: false, error: 'Empty cart' });
+  if (!n) return res.status(400).json({ ok: false, error: 'Empty cart' });
+  if (n > CONFIG.MAX_ORDER) return res.status(400).json({ ok: false, error: 'Too many items' });
   const p = calc(n);
   const free = p.total >= CONFIG.FREE_SHIPPING_FROM;
 

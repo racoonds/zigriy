@@ -425,6 +425,7 @@ $('#orderForm').addEventListener('submit', async e => {
   const v = Object.fromEntries(new FormData(e.target)), err = m => { const el = $('#orderErr'); el.textContent = m; el.hidden = !m; };
   const phone = normPhone(v.phone || '');
   const point = fPoint.value.trim(), what = NP.type === 'P' ? 'поштомат' : 'відділення';
+  if (count() > C.MAX_ORDER) return err(`Через сайт можна замовити до ${C.MAX_ORDER} свічок. Для більшого замовлення напишіть нам у Direct: домовимося про ціну й доставку.`);
   if (!v.name.trim()) return err('Вкажіть імʼя та прізвище.');
   if (!phone) return err('Введіть телефон у форматі +380XXXXXXXXX або 0XXXXXXXXX.');
   if (NP.manual ? !fCity.value.trim() : !NP.cityRef) return err(NP.manual ? 'Вкажіть місто.' : 'Оберіть місто зі списку підказок.');
@@ -454,7 +455,12 @@ $('#orderForm').addEventListener('submit', async e => {
     $('#orderDoneId').textContent = orderId;
     $('.sheet').classList.add('sent'); $('#orderDone').hidden = false;
   } catch (x) {
-    err('Не вдалося надіслати заявку. Спробуйте ще раз або напишіть нам у Direct.');
+    const why = {
+      'Too many items': `Через сайт можна замовити до ${C.MAX_ORDER} свічок. Для більшого замовлення напишіть нам у Direct.`,
+      'Invalid contact data': 'Перевірте імʼя, телефон, місто та відділення.',
+      'Empty cart': 'Кошик порожній. Додайте хоча б одну свічку.',
+    }[x.message];
+    err(why || 'Не вдалося надіслати заявку. Спробуйте ще раз або напишіть нам у Direct.');
   } finally {
     btn.disabled = false; btn.textContent = label;
   }
