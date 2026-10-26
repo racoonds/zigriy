@@ -359,7 +359,6 @@
     <div class="sheet-h"><h3 id="mTitle">Ваше замовлення</h3><button class="x" data-close aria-label="Закрити">×</button></div>
     <div class="lines" id="mLines"></div>
     <div class="upsell" id="mUpsell"></div>
-    <div class="totals" id="mTotals"></div>
     <form class="order" id="orderForm" novalidate>
       <h4>Швидке замовлення</h4>
       <label>Імʼя та прізвище<input name="name" autocomplete="name" maxlength="100" required></label>
@@ -382,6 +381,7 @@
       <label><em>Нік в Instagram <span>(необовʼязково)</span></em><input name="instagram" autocapitalize="none" autocorrect="off" maxlength="60"></label>
       <label class="check"><input type="checkbox" name="noCall" id="fNoCall"><span>Не передзвонюйте мені, замовлення підтверджую</span></label>
       <input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <div class="totals" id="mTotals" aria-live="polite"></div>
       <p class="err" id="orderErr" role="alert" hidden></p>
       <button class="btn block" id="orderBtn" type="submit">Підтвердити замовлення</button>
     </form>

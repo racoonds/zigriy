@@ -306,3 +306,4 @@ html{scroll-padding-top:calc(var(--tb-h-compact,56px) + 8px)}
 .order label.check{display:flex;align-items:flex-start;gap:10px;font-weight:700;font-size:14px;color:var(--ink);cursor:pointer}
 .order label.check input{width:20px;height:20px;margin:1px 0 0;flex:none;accent-color:var(--brown-d)}
 .totals .r .est{font-weight:800}
+.order .totals{margin:6px 0 0}
