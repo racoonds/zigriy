@@ -116,8 +116,10 @@ a{color:inherit}
 .scent .body{padding:12px 12px 14px;display:flex;flex-direction:column;gap:10px;flex:1}
 .scent .nm{font-weight:800;font-size:15px;line-height:1.25}
 .scent .ds{font-size:12.5px;color:var(--ink2);line-height:1.35;margin-top:-6px}
-.scent .pr{font-size:13px;font-weight:800;color:var(--brown);margin-top:-4px}
-.scent .burn{font-size:12px;font-weight:700;white-space:nowrap;color:var(--ink2);margin-top:-6px}
+.scent .pr{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 8px;margin-top:-4px}
+.scent .pr b{font-size:22px;font-weight:900;line-height:1.1;color:var(--brown-d);font-variant-numeric:tabular-nums}
+.scent .pr span{font-size:12px;font-weight:800;color:var(--ok)}
+.scent .burn{font-size:12.5px;font-weight:700;line-height:1.3;color:var(--ink2);margin-top:-6px}
 .scent .add{background:var(--brown-d);color:#fff;border-radius:12px;padding:11px;font-weight:800;font-size:14px;margin-top:auto}
 .scent .add:hover{background:var(--brown)}
 .stepper{display:none;align-items:center;justify-content:space-between;background:var(--gold-soft);border-radius:12px;margin-top:auto}
@@ -413,5 +415,5 @@ body.pv-open .cartbar{display:none}
 @media(min-width:860px){.pv-rvs{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px;overflow:visible;margin:0;padding:0}.pv-rv{flex:none;width:100%}}
 @media(max-width:559px){.pv-about{grid-template-columns:1fr}}
 /* картка аромату: назва й опис зверху, обʼєм, ціна й горіння — внизу над кнопкою, на одній висоті в усіх картках */
-.scent .body .pr{margin-top:auto;padding-top:2px}
+.scent .body .burn{margin-top:auto;padding-top:2px}
 .scent .body .add,.scent.in .body .stepper{margin-top:2px}

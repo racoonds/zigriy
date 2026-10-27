@@ -46,6 +46,7 @@ export function setsHTML() {
 }
 
 export function groupsHTML() {
+  const { minPer } = derive();
   return GROUPS.map(g => `
   <div class="group-title">${g.t}${g.tag ? ` <small>${g.tag}</small>` : ''}</div>
   <div class="grid">${SCENTS.filter(s => s.g === g.id).map(s => `
@@ -58,8 +59,8 @@ export function groupsHTML() {
       </div>
       <div class="body">
         <a class="nm" href="/aromat/${s.id}" data-pv="${s.id}">${s.n}</a><div class="ds">${s.d}</div>
-        <div class="pr">${C.VOLUME} · ${fmt(C.SINGLE_PRICE)}</div>
-        <div class="burn">🕯️ горить ${C.BURN}</div>
+        <div class="burn">${C.VOLUME} · горить ${C.BURN}</div>
+        <div class="pr"><b>${fmt(C.SINGLE_PRICE)}</b><span>у наборі від ${fmt(minPer)}</span></div>
         <button class="add" data-plus="${s.id}">+ Додати</button>
         <div class="stepper"><button data-minus="${s.id}" aria-label="Менше: ${s.n}">−</button><input class="qty" type="number" inputmode="numeric" min="0" max="${C.MAX_PER_SCENT}" data-qty="${s.id}" aria-label="Кількість: ${s.n}"><button data-plus="${s.id}" aria-label="Більше: ${s.n}">+</button></div>
       </div>
