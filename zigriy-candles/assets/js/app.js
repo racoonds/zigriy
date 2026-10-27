@@ -559,6 +559,14 @@ function galGo(i) {
   i = (i + n) % n;
   tr.scrollTo({ left: i * tr.clientWidth, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
 }
+// стрічка «Вам також сподобається»: стрілки гортають на ширину видимої частини
+function relSync() {
+  const r = $('#pvRel'); if (!r) return;
+  const max = r.scrollWidth - r.clientWidth;
+  const [prev, next] = $$('.pv-arr');
+  prev.disabled = r.scrollLeft <= 2; next.disabled = r.scrollLeft >= max - 2;
+  $('.pv-arrs').hidden = max <= 2;
+}
 function galSync() {
   const i = galCur();
   if ($('#pvIdx')) $('#pvIdx').textContent = i + 1;
@@ -575,8 +583,8 @@ function pvReviews(s) {
 
 function pvRelated(s) {
   const others = SCENTS.filter(x => x.id !== s.id).sort((a, b) => (b.g === s.g) - (a.g === s.g));
-  return `<section class="pv-sec"><h2>Вам також сподобається</h2><div class="pv-rel">${others.map(x => `
-    <a class="pv-card" href="/aromat/${x.id}" data-pv="${x.id}"><img src="${IMG(x.id)}" alt="" loading="lazy" width="800" height="800"><b>${x.n}</b><span>${fmt(C.SINGLE_PRICE)}</span></a>`).join('')}</div></section>`;
+  return `<section class="pv-sec"><div class="pv-sec-h"><h2>Вам також сподобається</h2><div class="pv-arrs"><button type="button" class="pv-arr" data-rel="-1" aria-label="Попередні аромати"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button><button type="button" class="pv-arr" data-rel="1" aria-label="Наступні аромати"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button></div></div><div class="pv-rel" id="pvRel">${others.map(x => `
+    <a class="pv-card" href="/aromat/${x.id}" data-pv="${x.id}"><img src="${IMG(x.photo || x.id)}" alt="" loading="lazy" width="800" height="800"><b>${x.n}</b><span>${fmt(C.SINGLE_PRICE)}</span></a>`).join('')}</div></section>`;
 }
 
 function pvFaq() {
@@ -622,6 +630,9 @@ function renderProduct() {
   $('#pvBar').innerHTML = `<div class="pv-bar-in"><div class="pv-bar-t"><b>${s.n}</b><span>${fmt(C.SINGLE_PRICE)} · ${C.VOLUME}</span></div><button type="button" class="btn" id="pvBarAdd">Додати в кошик</button></div>`;
   const tr = $('#pvTrack');
   tr.addEventListener('scroll', () => requestAnimationFrame(galSync), { passive: true });
+  const rel = $('#pvRel');
+  rel.addEventListener('scroll', () => requestAnimationFrame(relSync), { passive: true });
+  requestAnimationFrame(relSync);
   tr.addEventListener('keydown', e => { if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') { e.preventDefault(); galGo(galCur() + (e.key === 'ArrowRight' ? 1 : -1)); } });
   syncProduct();
 }
@@ -665,6 +676,8 @@ pv.addEventListener('click', e => {
   const gal = t.closest('[data-gal]'), th = t.closest('[data-go]');
   if (gal) { galGo(galCur() + +gal.dataset.gal); return; }
   if (th) { galGo(+th.dataset.go); return; }
+  const ra = t.closest('[data-rel]');
+  if (ra) { const r = $('#pvRel'); r.scrollBy({ left: +ra.dataset.rel * r.clientWidth * 0.85, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }); return; }
   const q = t.closest('[data-pvq]');
   if (q) { pvQty = Math.max(1, Math.min(C.MAX_PER_SCENT, pvTake() + +q.dataset.pvq)); $('#pvQty').value = pvQty; return; }
   if (t.closest('#pvAdd, #pvBarAdd')) { change(pvId, pvTake()); return; }

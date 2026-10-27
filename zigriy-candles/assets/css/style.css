@@ -436,3 +436,15 @@ body.pv-open .cartbar{display:none}
 .pv-thumb.on{opacity:1;border-color:var(--gold2)}
 .pv-thumb:focus-visible{outline:3px solid var(--gold2);outline-offset:2px}
 .pv-thumb .play{position:absolute;inset:0;display:grid;place-items:center;color:#fff;font-size:16px;text-shadow:0 1px 4px rgba(0,0,0,.6)}
+/* заголовок стрічки зі стрілками */
+.pv-sec-h{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+.pv-sec-h h2{margin:0}
+.pv-arrs{display:flex;gap:8px;flex:none}
+.pv-arrs[hidden]{display:none}
+.pv-arr{width:42px;height:42px;border-radius:99px;display:grid;place-items:center;background:var(--card);border:1.5px solid var(--line);color:var(--brown-d);cursor:pointer;transition:background .15s,border-color .15s,opacity .15s}
+.pv-arr:hover:not(:disabled){border-color:var(--gold2);background:var(--gold-soft)}
+.pv-arr:disabled{opacity:.35;cursor:default}
+.pv-arr:focus-visible{outline:3px solid var(--gold2);outline-offset:2px}
+.pv-rel{scroll-padding:0 max(16px,env(safe-area-inset-left))}
+/* компʼютер: 7 ароматів в один ряд на всю ширину; якщо ароматів стане більше — гортається стрілками */
+@media(min-width:860px){.pv-rel{display:grid;grid-auto-flow:column;grid-auto-columns:calc((100% - 72px) / 7);gap:12px;margin:0;padding:2px 0 8px;scroll-padding:0}.pv-card{flex:none;min-width:0}}
