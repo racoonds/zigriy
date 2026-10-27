@@ -340,7 +340,7 @@ body.pv-open .cartbar{display:none}
 .pv-main{display:grid;gap:22px}
 @media(min-width:860px){.pv-main{grid-template-columns:1.05fr 1fr;gap:44px;align-items:start}}
 .pv-gal{position:relative;border-radius:22px;overflow:hidden;background:#efe2cf;box-shadow:0 18px 40px -26px rgba(40,20,5,.55)}
-@media(min-width:860px){.pv-gal{position:sticky;top:76px}}
+@media(min-width:860px){.pv-media{position:sticky;top:76px}}
 .pv-track{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none}
 .pv-track::-webkit-scrollbar{display:none}
 .pv-slide{flex:0 0 100%;aspect-ratio:1/1;scroll-snap-align:start}
@@ -417,3 +417,20 @@ body.pv-open .cartbar{display:none}
 /* картка аромату: назва й опис зверху, обʼєм, ціна й горіння — внизу над кнопкою, на одній висоті в усіх картках */
 .scent .body .burn{margin-top:auto;padding-top:2px}
 .scent .body .add,.scent.in .body .stepper{margin-top:2px}
+/* слайдер фото на сторінці аромату */
+.pv-media{display:grid;gap:10px;min-width:0}
+.pv-track:focus-visible{outline:3px solid var(--gold2);outline-offset:-3px}
+.pv-nav{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:99px;display:grid;place-items:center;background:rgba(255,251,244,.88);color:var(--brown-d);box-shadow:0 6px 18px -8px rgba(40,20,5,.55);cursor:pointer;transition:background .15s,transform .15s}
+.pv-nav:hover{background:var(--card)}
+.pv-nav:active{transform:translateY(-50%) scale(.94)}
+.pv-nav:focus-visible{outline:3px solid var(--gold2);outline-offset:2px}
+.pv-nav.prev{left:10px}
+.pv-nav.next{right:10px}
+.pv-thumbs{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:2px}
+.pv-thumbs::-webkit-scrollbar{display:none}
+.pv-thumb{position:relative;flex:none;width:64px;height:64px;padding:0;border-radius:12px;overflow:hidden;border:2px solid transparent;background:#efe2cf;opacity:.65;cursor:pointer;transition:opacity .15s,border-color .15s}
+.pv-thumb img{width:100%;height:100%;object-fit:cover}
+.pv-thumb:hover{opacity:1}
+.pv-thumb.on{opacity:1;border-color:var(--gold2)}
+.pv-thumb:focus-visible{outline:3px solid var(--gold2);outline-offset:2px}
+.pv-thumb .play{position:absolute;inset:0;display:grid;place-items:center;color:#fff;font-size:16px;text-shadow:0 1px 4px rgba(0,0,0,.6)}

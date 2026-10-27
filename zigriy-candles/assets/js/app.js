@@ -532,12 +532,37 @@ const PV_ABOUT = [
 const tri = lvl => `<svg class="tri" viewBox="0 0 36 32" aria-hidden="true">
   <path d="M18 2 23.7 12H12.3Z" class="${lvl === 0 ? 'on' : ''}"/><path d="M12.3 12h11.4l5.1 9H7.2Z" class="${lvl === 1 ? 'on' : ''}"/><path d="M7.2 21h21.6L34 30H2Z" class="${lvl === 2 ? 'on' : ''}"/></svg>`;
 
+// галерея: фото гортаються пальцем, стрілками, мініатюрами й клавішами ← →
 function pvGallery(s) {
-  const slides = [IMG(s.id), ...(s.img2 ? [IMG(s.img2)] : []), ...(PV_EXTRA[s.id] || [])]
-    .map((src, i) => `<div class="pv-slide"><img src="${src}" alt="${i ? '' : `Свічка Zigriy «${s.n}»`}" width="800" height="800" ${i ? 'loading="lazy"' : ''}></div>`);
+  const items = [IMG(s.id), ...(s.img2 ? [IMG(s.img2)] : []), ...(PV_EXTRA[s.id] || [])].map(src => ({ src, thumb: src }));
   const v = $('.hero-visual video');
-  if (s.id === 'harbuzovyi-chai' && v) slides.push(`<div class="pv-slide"><video src="${v.currentSrc || v.src}" muted loop playsinline autoplay aria-label="Свічка «${s.n}» горить"></video></div>`);
-  return `<div class="pv-gal"><div class="pv-track" id="pvTrack">${slides.join('')}</div>${slides.length > 1 ? `<div class="pv-count"><span id="pvIdx">1</span> / ${slides.length}</div>` : ''}</div>`;
+  if (s.id === 'harbuzovyi-chai' && v) items.push({ video: v.currentSrc || v.src, thumb: v.poster });
+  const slides = items.map((it, i) => `<div class="pv-slide" role="group" aria-roledescription="слайд" aria-label="${i + 1} з ${items.length}">${it.video
+    ? `<video src="${it.video}" muted loop playsinline autoplay aria-label="Свічка «${s.n}» горить"></video>`
+    : `<img src="${it.src}" alt="${i ? `«${s.n}», фото ${i + 1}` : `Свічка Zigriy «${s.n}»`}" width="800" height="800" ${i ? 'loading="lazy"' : ''}>`}</div>`).join('');
+  const many = items.length > 1;
+  return `<div class="pv-media">
+    <div class="pv-gal" aria-roledescription="галерея" aria-label="Фото «${s.n}»">
+      <div class="pv-track" id="pvTrack" tabindex="0">${slides}</div>
+      ${many ? `<button type="button" class="pv-nav prev" data-gal="-1" aria-label="Попереднє фото"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button>
+      <button type="button" class="pv-nav next" data-gal="1" aria-label="Наступне фото"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+      <div class="pv-count" aria-live="polite"><span id="pvIdx">1</span> / ${items.length}</div>` : ''}
+    </div>
+    ${many ? `<div class="pv-thumbs">${items.map((it, i) => `<button type="button" class="pv-thumb${i ? '' : ' on'}" data-go="${i}" aria-label="Фото ${i + 1}"${i ? '' : ' aria-current="true"'}><img src="${it.thumb}" alt="" width="64" height="64">${it.video ? '<span class="play" aria-hidden="true">▶</span>' : ''}</button>`).join('')}</div>` : ''}
+  </div>`;
+}
+const galN = () => $$('#pvTrack .pv-slide').length;
+const galCur = () => { const tr = $('#pvTrack'); return Math.round(tr.scrollLeft / tr.clientWidth); };
+function galGo(i) {
+  const tr = $('#pvTrack'), n = galN();
+  if (!tr || n < 2) return;
+  i = (i + n) % n;
+  tr.scrollTo({ left: i * tr.clientWidth, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+}
+function galSync() {
+  const i = galCur();
+  if ($('#pvIdx')) $('#pvIdx').textContent = i + 1;
+  $$('.pv-thumb').forEach((t, k) => { t.classList.toggle('on', k === i); t.toggleAttribute('aria-current', k === i); });
 }
 
 function pvReviews(s) {
@@ -596,7 +621,8 @@ function renderProduct() {
     ${pvFaq()}`;
   $('#pvBar').innerHTML = `<div class="pv-bar-in"><div class="pv-bar-t"><b>${s.n}</b><span>${fmt(C.SINGLE_PRICE)} · ${C.VOLUME}</span></div><button type="button" class="btn" id="pvBarAdd">Додати в кошик</button></div>`;
   const tr = $('#pvTrack');
-  if ($('#pvIdx')) tr.addEventListener('scroll', () => { $('#pvIdx').textContent = Math.round(tr.scrollLeft / tr.clientWidth) + 1; }, { passive: true });
+  tr.addEventListener('scroll', () => requestAnimationFrame(galSync), { passive: true });
+  tr.addEventListener('keydown', e => { if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') { e.preventDefault(); galGo(galCur() + (e.key === 'ArrowRight' ? 1 : -1)); } });
   syncProduct();
 }
 
@@ -636,6 +662,9 @@ addEventListener('popstate', e => { const id = e.state && e.state.pv; if (id) op
 const pvTake = () => { const v = parseInt($('#pvQty').value, 10); pvQty = Math.max(1, Math.min(C.MAX_PER_SCENT, v || 1)); $('#pvQty').value = pvQty; return pvQty; };
 pv.addEventListener('click', e => {
   const t = e.target;
+  const gal = t.closest('[data-gal]'), th = t.closest('[data-go]');
+  if (gal) { galGo(galCur() + +gal.dataset.gal); return; }
+  if (th) { galGo(+th.dataset.go); return; }
   const q = t.closest('[data-pvq]');
   if (q) { pvQty = Math.max(1, Math.min(C.MAX_PER_SCENT, pvTake() + +q.dataset.pvq)); $('#pvQty').value = pvQty; return; }
   if (t.closest('#pvAdd, #pvBarAdd')) { change(pvId, pvTake()); return; }
