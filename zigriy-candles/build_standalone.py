@@ -30,11 +30,11 @@ def sub_once(old, new, text, what):
     return text.replace(old, new, 1)
 
 
-ASSET_RE = re.compile(r'(?<=["(])/(?:assets/[^"\')]+?\.(?:png|jpg|webp)|favicon\.png|apple-touch-icon\.png)(?=["\')])')
+ASSET_RE = re.compile(r'(?<=["(])/(?:assets/[^"\')?]+?\.(?:png|jpg|webp)|favicon\.png|apple-touch-icon\.png)(?:\?v=\d+)?(?=["\')])')
 
 
 def inline_assets(text):
-    return ASSET_RE.sub(lambda m: data_uri(m.group(0)), text)
+    return ASSET_RE.sub(lambda m: data_uri(m.group(0).split('?')[0]), text)
 
 
 html = (ROOT / 'index.html').read_text(encoding='utf-8')
