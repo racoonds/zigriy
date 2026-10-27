@@ -504,14 +504,29 @@ const pv = $('#pv'), BASE_TITLE = document.title;
 let pvId = null, pvQty = 1, pvFocus = null;
 const NOTE_ROWS = [['top', 'Верхні ноти', 0], ['mid', 'Середні ноти', 1], ['base', 'Базові ноти', 2]];
 const PV_EXTRA = { shokolad: ["/assets/img/gallery/shokolad-cozy.webp"] }; // додаткові фото аромату
+const ICO = {
+  wax: '<path d="M12 22c4.4 0 7-2.7 7-6.5 0-4.6-4-6.5-4.6-11.5C11 6 8.5 9 8.5 12c-1.2-.6-2-1.8-2.2-3C5.6 10.4 5 12.2 5 14.5 5 19.3 7.6 22 12 22z"/>',
+  wick: '<path d="M4 20 20 4M7 21l-4-4M21 7l-4-4M9 13l2 2M13 9l2 2"/>',
+  volume: '<path d="M8 3h8M9 3v6l-4 9a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-4-9V3"/><path d="M6.5 15h11"/>',
+  time: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  scent: '<path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/><circle cx="12" cy="12" r="2.5"/>',
+  jar: '<rect x="6" y="3" width="12" height="4" rx="1"/><path d="M7 7h10v12a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2z"/>',
+  crystal: '<path d="M12 2v20M4.9 4.9l14.2 14.2M2 12h20M4.9 19.1 19.1 4.9M9 3l3 3 3-3M9 21l3-3 3 3"/>',
+  hand: '<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21.2l8.8-8.8a5.5 5.5 0 0 0 0-7.8z"/>',
+  truck: '<path d="M1 6h13v10H1zM14 10h4l3 3v3h-7"/><circle cx="5" cy="18" r="2"/><circle cx="17" cy="18" r="2"/>',
+  box: '<path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/>',
+  check: '<circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/>',
+};
+const ico = k => `<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICO[k]}</svg>`;
 const PV_ABOUT = [
-  ['Віск', 'натуральний пальмовий, без парафіну'],
-  ['Ґніт', 'деревʼяний, тихо потріскує, як камін'],
-  ['Обʼєм', () => C.VOLUME],
-  ['Горіння', () => C.BURN],
-  ['Аромат', 'сертифіковані аромаолії'],
-  ['Баночка', 'скляна, з деревʼяною кришечкою'],
-  ['Візерунок', 'кришталевий, у кожної свічки свій'],
+  ['wax', 'Віск', 'натуральний пальмовий, без парафіну'],
+  ['wick', 'Ґніт', 'деревʼяний, тихо потріскує, як камін'],
+  ['volume', 'Обʼєм', () => C.VOLUME],
+  ['time', 'Горіння', () => C.BURN],
+  ['scent', 'Аромат', 'сертифіковані аромаолії'],
+  ['jar', 'Баночка', 'скляна, з деревʼяною кришечкою'],
+  ['crystal', 'Візерунок', 'кришталевий, у кожної свічки свій'],
+  ['hand', 'Виготовлення', 'вручну, у Дрогобичі'],
 ];
 // трикутник-піраміда: підсвічений рівень нот
 const tri = lvl => `<svg class="tri" viewBox="0 0 36 32" aria-hidden="true">
@@ -528,7 +543,7 @@ function pvGallery(s) {
 function pvReviews(s) {
   const all = [...$$('.rv')];
   const own = all.filter(b => b.dataset.scent === s.id);
-  const list = [...own, ...all.filter(b => !own.includes(b))].slice(0, 6); // спершу про цей аромат
+  const list = [...own, ...all.filter(b => !own.includes(b))]; // спершу про цей аромат, далі всі інші
   return `<section class="pv-sec"><h2>Відгуки покупців</h2>${own.length ? `<p class="pv-hint">Спершу відгуки саме про «${s.n}»</p>` : ''}
     <div class="pv-rvs">${list.map(b => { const im = b.querySelector('img'); return `<button type="button" class="pv-rv" data-rvi="${all.indexOf(b)}" aria-label="Відкрити відгук"><img src="${im.getAttribute('src')}" alt="${esc(im.alt)}" loading="lazy" width="600" height="1067"></button>`; }).join('')}</div></section>`;
 }
@@ -555,7 +570,7 @@ function renderProduct() {
       <div class="pv-info">
         ${g.t ? `<p class="pv-group">${g.t}${g.tag ? ` · ${g.tag}` : ''}</p>` : ''}
         <h1 id="pvTitle" tabindex="-1">${s.n}</h1>
-        <p class="pv-meta">${C.VOLUME} · горить ${C.BURN}</p>
+        <ul class="pv-chips"><li>${ico('volume')}${C.VOLUME}</li><li>${ico('time')}горить ${C.BURN}</li><li>${ico('wick')}потріскує</li></ul>
         <div class="pv-price"><b>${fmt(C.SINGLE_PRICE)}</b><span>у наборі від ${fmt(D.minPer)} за штуку</span></div>
         <p class="pv-ds">${s.d}</p>
         <div class="pv-buy">
@@ -564,11 +579,16 @@ function renderProduct() {
         </div>
         <button type="button" class="btn alt block" id="pvNow">Замовити зараз</button>
         <p class="pv-incart" id="pvInCart" aria-live="polite"></p>
+        <ul class="pv-trust">
+          <li>${ico('truck')}<span>Безкоштовна доставка від <b>${D.free}</b></span></li>
+          <li>${ico('box')}<span>Новою Поштою у відділення чи поштомат</span></li>
+          <li>${ico('check')}<span>Оплата після підтвердження менеджером</span></li>
+        </ul>
+        ${rows.length ? `<div class="pv-notes-wrap"><h2>Ноти аромату</h2><div class="pv-notes">${rows.map(([k, t, l]) => `
+          <div class="pv-note">${tri(l)}<div><b>${t}</b><ul>${s.notes[k].map(n => `<li>${esc(n)}</li>`).join('')}</ul></div></div>`).join('')}</div></div>` : ''}
       </div>
     </div>
-    ${rows.length ? `<section class="pv-sec"><h2>Ноти аромату</h2><div class="pv-notes">${rows.map(([k, t, l]) => `
-      <div class="pv-note">${tri(l)}<div><b>${t}</b><ul>${s.notes[k].map(n => `<li>${esc(n)}</li>`).join('')}</ul></div></div>`).join('')}</div></section>` : ''}
-    <section class="pv-sec"><h2>Про свічку</h2><dl class="pv-about">${PV_ABOUT.map(([k, v]) => `<div><dt>${k}</dt><dd>${typeof v === 'function' ? v() : v}</dd></div>`).join('')}</dl></section>
+    <section class="pv-sec"><h2>Про свічку</h2><dl class="pv-about">${PV_ABOUT.map(([i, k, v]) => `<div>${ico(i)}<dt>${k}</dt><dd>${typeof v === 'function' ? v() : v}</dd></div>`).join('')}</dl></section>
     <section class="pv-sec"><h2>Чим більше, тим дешевше</h2><p class="pv-hint">Аромати в набір можна змішувати: ціна рахується від загальної кількості.</p>
       <div class="pv-sets">${sets.map(x => `<div class="${x.qty === D.minSet.qty ? 'best' : ''}"><b>${x.qty} ${candles(x.qty)}</b><span>${fmt(x.price)}</span><small>${Math.round(x.price / x.qty)} грн / шт</small></div>`).join('')}</div></section>
     ${pvReviews(s)}
