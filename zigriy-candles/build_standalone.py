@@ -51,7 +51,7 @@ app = sub_once("import { CONFIG as C, GROUPS, SCENTS, calc } from './config.js';
 app = sub_once("import { fmt, plural, candles, hash, IMG, derive, setsHTML, groupsHTML } from './render.js';\n", '', app, 'import render у app.js')
 scents = {p.stem: data_uri(f'/assets/img/scents/{p.name}') for p in sorted((ROOT / 'assets/img/scents').glob('*.webp'))}
 img_map = ',\n'.join(f'  {k!r}: {v!r}' for k, v in scents.items())
-render = sub_once('const IMG = id => `/assets/img/scents/${id}.webp`;',
+render = sub_once('const IMG = id => `/assets/img/scents/${id}.webp?v=${C.IMG_VERSION}`;',
                f'const __IMG = {{\n{img_map}\n}};\nconst IMG = id => __IMG[id] || "";', render, 'IMG у render.js')
 js = inline_assets(config + '\n' + render + '\n' + app).replace('</script', '<\\/script')
 

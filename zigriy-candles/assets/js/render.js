@@ -10,7 +10,7 @@ export const plural = (n, one, few, many) => {
   return many;
 };
 export const candles = n => plural(n, 'свічка', 'свічки', 'свічок');
-export const IMG = id => `/assets/img/scents/${id}.webp`;
+export const IMG = id => `/assets/img/scents/${id}.webp?v=${C.IMG_VERSION}`;
 export const hash = s => { let h = 5381; for (let i = 0; i < s.length; i++) h = ((h * 33) ^ s.charCodeAt(i)) >>> 0; return h.toString(36); };
 
 export function derive() {

@@ -9,6 +9,8 @@ export const CONFIG = {
   META_PIXEL_ID: '',     // ← ID Meta Pixel (порожньо = вимкнено)
   TIKTOK_PIXEL_ID: '',   // ← ID TikTok Pixel (порожньо = вимкнено)
 
+  IMG_VERSION: 2,         // збільшуйте, коли замінюєте фото ароматів, щоб браузери не показували старі з кешу
+
   VOLUME: '200 мл',
   BURN: '40+ годин',     // скільки горить одна свічка
   SINGLE_PRICE: 450,     // ціна однієї свічки (з Instagram)
