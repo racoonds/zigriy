@@ -3,7 +3,7 @@
 // Запускати після змін у assets/js/config.js:  node scripts/prerender.mjs
 import { readFileSync, writeFileSync } from 'node:fs';
 import { CONFIG as C } from '../assets/js/config.js';
-import { derive, fmt, hash, setsHTML, groupsHTML } from '../assets/js/render.js';
+import { derive, fmt, hash, setsHTML, groupsHTML, bundlesHTML } from '../assets/js/render.js';
 
 const file = new URL('../index.html', import.meta.url);
 let html = readFileSync(file, 'utf8');
@@ -21,7 +21,7 @@ swap(/(id="heroOld">)[^<]*/, `$1${fmt(C.SINGLE_PRICE)}`, 'heroOld');
 swap(/(id="heroBadge">)[^<]*/, `$1${d.badge}`, 'heroBadge');
 swap(/(id="shipSub">)[^<]*/, `$1${d.shipSub}`, 'shipSub');
 swap(/(id="yr">)[^<]*/, `$1${new Date().getFullYear()}`, 'yr');
-for (const [id, make] of [['setsGrid', setsHTML], ['groups', groupsHTML]]) {
+for (const [id, make] of [['setsGrid', setsHTML], ['bundlesGrid', bundlesHTML], ['groups', groupsHTML]]) {
   const body = make();
   swap(new RegExp(`(id="${id}" data-h=")[^"]*(">)[\\s\\S]*?(<!--/${id}-->)`), `$1${hash(body)}$2${body}$3`, id);
 }

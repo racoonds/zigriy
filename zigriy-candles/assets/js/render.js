@@ -45,6 +45,25 @@ export function setsHTML() {
   }).join('');
 }
 
+// картки готових наборів (секція «Популярні набори» і «Інші набори» на сторінці набору)
+export function bundlesHTML(skip) {
+  return (C.BUNDLES || []).filter(b => b.id !== skip).map(b => {
+    const items = b.items.map(id => SCENTS.find(s => s.id === id)).filter(Boolean), p = calc(items.length);
+    const deal = C.COUNTDOWN && b.id === C.DEAL;
+    return `
+    <article class="bundle${deal ? ' deal' : ''}">
+      <a class="bd-pics" href="/nabir/${b.id}" data-bundle="${b.id}" aria-label="${b.n}: склад і ціна">${items.map(s => `<img src="${IMG(s.photo || s.id)}" alt="" loading="lazy" width="800" height="800">`).join('')}<span class="bd-tag">${deal ? 'Набір дня' : `${items.length} ${candles(items.length)}`}</span></a>
+      <div class="bd-body">
+        <h3><a href="/nabir/${b.id}" data-bundle="${b.id}">${b.n}</a></h3>
+        <p class="bd-sub">${b.t || ''}</p>
+        <ul class="bd-list">${items.map(s => `<li>${s.n}</li>`).join('')}</ul>
+        <div class="bd-pr"><b>${fmt(p.total)}</b>${p.save ? `<s>${fmt(p.full)}</s><span>−${fmt(p.save)}</span>` : ''}</div>
+        <div class="bd-act"><button type="button" class="btn" data-add-bundle="${b.id}">Додати набір</button><a class="bd-more" href="/nabir/${b.id}" data-bundle="${b.id}">Склад</a></div>
+      </div>
+    </article>`;
+  }).join('');
+}
+
 export function groupsHTML() {
   const { minPer } = derive();
   return GROUPS.map(g => `

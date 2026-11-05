@@ -1,5 +1,5 @@
 import { CONFIG as C, GROUPS, SCENTS, calc } from './config.js';
-import { fmt, plural, candles, hash, IMG, derive, setsHTML, groupsHTML } from './render.js';
+import { fmt, plural, candles, hash, IMG, derive, setsHTML, groupsHTML, bundlesHTML } from './render.js';
 
 const $ = s => document.querySelector(s);
 const $$ = s => document.querySelectorAll(s);
@@ -71,6 +71,7 @@ window.__zph = (img, c1, c2) => { img.outerHTML = candleSVG(c1, c2); };
 /* ---------- sets + scents: перемальовуємо, лише якщо HTML застарів відносно config.js ---------- */
 const hydrate = (el, html) => { const h = hash(html); if (el.dataset.h !== h) { el.innerHTML = html; el.dataset.h = h; } };
 hydrate($('#setsGrid'), setsHTML());
+hydrate($('#bundlesGrid'), bundlesHTML());
 hydrate($('#groups'), groupsHTML());
 $('#groups').addEventListener('error', e => {
   const im = e.target;
@@ -678,11 +679,11 @@ function renderBundle() {
     ...items.map(s => ({ src: IMG(s.id), thumb: IMG(s.id), alt: `Свічка Zigriy «${s.n}»` })),
   ];
   $('#pvBody').innerHTML = `
-    <nav class="crumbs" aria-label="Навігація"><a href="/" data-pv-close>Головна</a><span>/</span><a href="/#sets" data-pv-close>Набори</a><span>/</span><span aria-current="page">${b.n}</span></nav>
+    <nav class="crumbs" aria-label="Навігація"><a href="/" data-pv-close>Головна</a><span>/</span><a href="/#bundles" data-pv-close>Набори</a><span>/</span><span aria-current="page">${b.n}</span></nav>
     <div class="pv-main">
       ${galleryHTML(b.n, gal)}
       <div class="pv-info">
-        <p class="pv-group">Набір дня${C.COUNTDOWN ? ' · ціна діє лише сьогодні' : ''}</p>
+        <p class="pv-group">${b.id === C.DEAL ? 'Набір дня' : 'Популярний набір'}${C.COUNTDOWN ? ' · ціна діє лише сьогодні' : ''}</p>
         <h1 id="pvTitle" tabindex="-1">${b.n}</h1>
         <ul class="pv-chips"><li>${ico('jar')}${k} ${candles(k)}</li><li>${ico('volume')}${C.VOLUME} кожна</li><li>${ico('time')}горить ${C.BURN}</li></ul>
         <div class="pv-price"><b>${fmt(p.total)}</b>${p.save ? `<s>${fmt(p.full)}</s><span>економія ${fmt(p.save)}</span>` : ''}</div>
@@ -713,6 +714,7 @@ function renderBundle() {
           </div>
         </article>`).join('')}</div></section>
     <section class="pv-sec"><h2>Про свічки</h2><dl class="pv-about">${PV_ABOUT.map(([i, kk, v]) => `<div>${ico(i)}<dt>${kk}</dt><dd>${typeof v === 'function' ? v() : v}</dd></div>`).join('')}</dl></section>
+    ${BUNDLES.length > 1 ? `<section class="pv-sec"><h2>Інші набори</h2><div class="bundles">${bundlesHTML(b.id)}</div></section>` : ''}
     ${pvReviews(b, b.items, 'Спершу відгуки про аромати з набору')}
     ${pvFaq()}`;
   $('#pvBar').innerHTML = `<div class="pv-bar-in"><div class="pv-bar-t"><b>${b.n}</b><span>${k} ${candles(k)} · ${fmt(p.total)}</span></div><button type="button" class="btn" id="pvBarAdd">Додати набір</button></div>`;
@@ -742,7 +744,7 @@ function openPage(kind, id, push = true) {
   renderProduct();
   pv.hidden = false; document.body.classList.add('pv-open'); pv.scrollTop = 0;
   document.title = kind === 'nabir' ? bundleTitle(s) : `${s.n}: свічка Zigriy ${C.VOLUME}`;
-  if (push) { try { history.pushState({ pv: id, kind }, '', `/${kind}/${id}`); } catch (e) {} }
+  if (push) { try { history.pushState({ pv: id, kind, d: ((history.state && history.state.d) || 0) + 1 }, '', `/${kind}/${id}`); } catch (e) {} }
   $('#pvTitle').focus({ preventScroll: true });
   const vc = kind === 'nabir'
     ? { content_ids: s.items, content_name: s.n, content_type: 'product_group', value: calc(s.items.length).total, currency: 'UAH' }
@@ -756,7 +758,8 @@ function closeProduct(fromHistory = false) {
   pvId = null;
   pv.hidden = true; document.body.classList.remove('pv-open'); document.title = BASE_TITLE;
   pv.querySelectorAll('video').forEach(v => v.pause());
-  if (!fromHistory) { try { if (history.state && history.state.pv) history.back(); else history.replaceState(null, '', '/'); } catch (e) {} }
+  // d — скільки сторінок аромату/набору відкрито поспіль: повертаємось одразу на головну
+  if (!fromHistory) { try { const d = history.state && history.state.d; if (d > 0) history.go(-d); else history.replaceState(null, '', '/'); } catch (e) {} }
   pvFocus && pvFocus.focus && pvFocus.focus({ preventScroll: true });
 }
 
@@ -784,9 +787,9 @@ pv.addEventListener('click', e => {
   const cl = t.closest('[data-pv-close]');
   if (cl) {
     e.preventDefault();
-    const toScents = (cl.getAttribute('href') || '').includes('#scents') || cl.classList.contains('pv-back');
+    const href = cl.getAttribute('href') || '', to = href.includes('#bundles') ? '#bundles' : href.includes('#scents') || cl.classList.contains('pv-back') ? '#scents' : '';
     closeProduct();
-    if (toScents) setTimeout(() => $('#scents').scrollIntoView(), 0);
+    if (to) setTimeout(() => $(to).scrollIntoView(), 0);
   }
 });
 pv.addEventListener('change', e => { if (e.target.id === 'pvQty') pvTake(); });
@@ -798,6 +801,8 @@ document.addEventListener('click', e => {
   e.preventDefault();
   openProduct(a.dataset.pv);
 });
+// «Додати набір» у картках наборів
+document.addEventListener('click', e => { const b = e.target.closest('[data-add-bundle]'); if (b) addBundle(b.dataset.addBundle); });
 // таймер у шапці (і будь-яке посилання data-bundle) відкриває сторінку набору
 document.addEventListener('click', e => {
   const a = e.target.closest('[data-bundle]');
@@ -810,7 +815,7 @@ document.addEventListener('click', e => {
 {
   const m = location.pathname.match(/^\/(aromat|nabir)\/([\w-]+)\/?$/);
   const ok = m && (m[1] === 'nabir' ? bundleOf(m[2]) : SCENTS.some(s => s.id === m[2]));
-  if (ok) { try { history.replaceState({ pv: m[2], kind: m[1] }, '', location.pathname); } catch (e) {} openPage(m[1], m[2], false); }
+  if (ok) { try { history.replaceState({ pv: m[2], kind: m[1], d: 0 }, '', location.pathname); } catch (e) {} openPage(m[1], m[2], false); }
 }
 
 /* ---------- countdown: щодня до опівночі ---------- */
