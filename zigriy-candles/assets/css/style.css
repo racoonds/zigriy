@@ -451,11 +451,19 @@ body.pv-open .cartbar{display:none}
 /* таймер у шапці — посилання на набір дня */
 .tb-deal{display:block;color:inherit;text-decoration:none;border-radius:12px;-webkit-tap-highlight-color:transparent}
 .tb-deal:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
-.timer .go .n{background:linear-gradient(180deg,var(--gold),var(--gold2));border-color:var(--gold);font-size:22px;padding:10px 8px 9px;transition:transform .15s}
-.timer .go .l{opacity:1;color:var(--gold);font-weight:900}
-.tb-deal:hover .go .n{transform:translateY(-1px)}
-.topbar.compact .timer .go .n{font-size:17px;padding:7px 8px 6px}
-@media(prefers-reduced-motion:no-preference){.timer .go .n{animation:dealPulse 2.4s ease-in-out infinite}}
+/* набір дня — окрема кнопка праворуч від таймера, за тонкою рискою */
+.tb-sep{align-self:stretch;flex:none;width:1px;margin:2px 10px 18px;background:rgba(242,202,90,.3)}
+.tb-set{display:flex;align-items:center;gap:7px;height:44px;padding:0 12px 0 9px;border-radius:12px;background:linear-gradient(180deg,var(--gold),var(--gold2));color:var(--brown-d);text-align:left;transition:transform .15s,height .25s}
+.tb-set .ic{font-size:20px;line-height:1}
+.tb-set .tx{display:grid;line-height:1.1}
+.tb-set b{font-size:13px;font-weight:900;white-space:nowrap}
+.tb-set small{font-size:11.5px;font-weight:800;opacity:.75;white-space:nowrap;max-height:16px;overflow:hidden;transition:max-height .25s,opacity .25s}
+.tb-deal:hover .tb-set{transform:translateY(-1px)}
+.topbar.compact .tb-set{height:34px}
+.topbar.compact .tb-set small{max-height:0;opacity:0}
+.topbar.compact .tb-sep{margin:2px 10px}
+@media(max-width:380px){.tb-sep{margin-left:6px;margin-right:6px}.tb-set{padding:0 9px 0 7px}.tb-set .ic{font-size:17px}}
+@media(prefers-reduced-motion:no-preference){.tb-set{animation:dealPulse 2.4s ease-in-out infinite}}
 @keyframes dealPulse{0%,100%{box-shadow:0 0 0 0 rgba(242,202,90,.55)}50%{box-shadow:0 0 0 6px rgba(242,202,90,0)}}
 @media(max-width:359px){.timer .u{min-width:52px}.timer .n{font-size:24px}}
 /* сторінка набору */

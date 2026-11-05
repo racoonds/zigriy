@@ -821,8 +821,9 @@ document.addEventListener('click', e => {
 /* ---------- countdown: щодня до опівночі ---------- */
 if (C.COUNTDOWN) {
   const deal = $('.tb-deal'); // таймер веде на набір DEAL; немає такого набору — просто таймер
-  if (bundleOf(C.DEAL)) { deal.dataset.bundle = C.DEAL; deal.href = '/nabir/' + C.DEAL; }
-  else { deal.removeAttribute('href'); delete deal.dataset.bundle; $('.timer .go').remove(); }
+  const db = bundleOf(C.DEAL);
+  if (db) { deal.dataset.bundle = C.DEAL; deal.href = '/nabir/' + C.DEAL; $('#tbSetName').textContent = db.n.split(' ')[0] + ' ›'; }
+  else { deal.removeAttribute('href'); delete deal.dataset.bundle; $$('.tb-set, .tb-sep').forEach(el => el.remove()); }
   const tick = () => {
     const [h, m, s] = cdParts();
     $('#cdH').textContent = h; $('#cdM').textContent = m; $('#cdS').textContent = s;
