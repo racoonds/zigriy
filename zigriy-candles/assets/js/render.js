@@ -45,8 +45,9 @@ export function setsHTML() {
   }).join('');
 }
 
-// превʼю наборів: спершу аромати з оформленою карткою (колаж із назвою — осіння колекція), далі звичайні фото
-export const cardFirst = items => [...items].sort((a, b) => (b.g === 'autumn') - (a.g === 'autumn'));
+// превʼю наборів: спершу аромати з оформленою карткою (колаж із назвою — осіння колекція або card: true), далі звичайні фото
+const hasCard = s => s.g === 'autumn' || !!s.card;
+export const cardFirst = items => [...items].sort((a, b) => hasCard(b) - hasCard(a));
 
 // картки готових наборів (секція «Популярні набори» і «Інші набори» на сторінці набору)
 export function bundlesHTML(skip) {
