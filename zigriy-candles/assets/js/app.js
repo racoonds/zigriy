@@ -1,5 +1,5 @@
 import { CONFIG as C, GROUPS, SCENTS, calc, calcCart, bundlePrice } from './config.js';
-import { fmt, plural, candles, hash, IMG, derive, setsHTML, groupsHTML, bundlesHTML } from './render.js';
+import { fmt, plural, candles, hash, IMG, derive, setsHTML, groupsHTML, bundlesHTML, cardFirst } from './render.js';
 
 const $ = s => document.querySelector(s);
 const $$ = s => document.querySelectorAll(s);
@@ -679,9 +679,9 @@ function renderBundle() {
   const b = bundleOf(pvId), items = bItems(b), k = items.length, p = bundlePrice(b);
   const names = items.map(s => s.n.toLowerCase());
   const list = `${names.slice(0, -1).join(', ')} і ${names[names.length - 1]}`;
-  const collage = `<div class="bx-collage">${items.map(s => `<img src="${IMG(s.photo || s.id)}" alt="" width="800" height="800">`).join('')}<span class="bx-badge">${k} ${candles(k)}</span></div>`;
+  const collage = `<div class="bx-collage">${cardFirst(items).map(s => `<img src="${IMG(s.id)}" alt="" width="800" height="800">`).join('')}<span class="bx-badge">${k} ${candles(k)}</span></div>`;
   const gal = [
-    { html: collage, thumb: IMG(items[0].photo || items[0].id) },
+    { html: collage, thumb: IMG(cardFirst(items)[0].id) },
     ...items.map(s => ({ src: IMG(s.id), thumb: IMG(s.id), alt: `Свічка Zigriy «${s.n}»` })),
   ];
   $('#pvBody').innerHTML = `
@@ -715,7 +715,7 @@ function renderBundle() {
           <div class="bx-txt">
             <h3><a href="/aromat/${s.id}" data-pv="${s.id}">${s.n}</a></h3>
             <p>${s.d}</p>
-            ${s.notes ? `<ul class="bx-notes">${[...(s.notes.top || []), ...(s.notes.mid || [])].slice(0, 4).map(n => `<li>${esc(n)}</li>`).join('')}</ul>` : ''}
+            ${s.notes ? `<p class="bx-notes"><b>Ноти:</b> ${esc([...(s.notes.top || []), ...(s.notes.mid || [])].slice(0, 4).join(', '))}</p>` : ''}
             <a class="bx-more" href="/aromat/${s.id}" data-pv="${s.id}">Ноти й відгуки ›</a>
           </div>
         </article>`).join('')}</div></section>

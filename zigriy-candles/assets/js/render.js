@@ -45,6 +45,9 @@ export function setsHTML() {
   }).join('');
 }
 
+// превʼю наборів: спершу аромати з оформленою карткою (колаж із назвою — осіння колекція), далі звичайні фото
+export const cardFirst = items => [...items].sort((a, b) => (b.g === 'autumn') - (a.g === 'autumn'));
+
 // картки готових наборів (секція «Популярні набори» і «Інші набори» на сторінці набору)
 export function bundlesHTML(skip) {
   return (C.BUNDLES || []).filter(b => b.id !== skip).map(b => {
@@ -52,7 +55,7 @@ export function bundlesHTML(skip) {
     const deal = C.COUNTDOWN && b.id === C.DEAL;
     return `
     <article class="bundle${deal ? ' deal' : ''}">
-      <a class="bd-pics" href="/nabir/${b.id}" data-bundle="${b.id}" aria-label="${b.n}: склад і ціна">${items.map(s => `<img src="${IMG(s.photo || s.id)}" alt="" loading="lazy" width="800" height="800">`).join('')}<span class="bd-tag">${deal ? 'Набір тижня' : `${items.length} ${candles(items.length)}`}</span></a>
+      <a class="bd-pics" href="/nabir/${b.id}" data-bundle="${b.id}" aria-label="${b.n}: склад і ціна">${cardFirst(items).map(s => `<img src="${IMG(s.id)}" alt="" loading="lazy" width="800" height="800">`).join('')}<span class="bd-tag">${deal ? 'Набір тижня' : `${items.length} ${candles(items.length)}`}</span></a>
       <div class="bd-body">
         <h3><a href="/nabir/${b.id}" data-bundle="${b.id}">${b.n}</a></h3>
         <p class="bd-sub">${b.t || ''}</p>

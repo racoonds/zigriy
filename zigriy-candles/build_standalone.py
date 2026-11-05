@@ -47,8 +47,8 @@ app = (ROOT / 'assets/js/app.js').read_text(encoding='utf-8')
 config = re.sub(r'^export ', '', config, flags=re.M)
 render = re.sub(r'^import .*;\n', '', render, flags=re.M)
 render = re.sub(r'^export ', '', render, flags=re.M)
-app = sub_once("import { CONFIG as C, GROUPS, SCENTS, calc, calcCart, bundlePrice } from './config.js';", 'const C = CONFIG;', app, 'import config у app.js')
-app = sub_once("import { fmt, plural, candles, hash, IMG, derive, setsHTML, groupsHTML, bundlesHTML } from './render.js';\n", '', app, 'import render у app.js')
+app = sub_once(re.search(r"^import \{ CONFIG as C,[^}]*\} from './config.js';", app, re.M).group(0), 'const C = CONFIG;', app, 'import config у app.js')
+app = sub_once(re.search(r"^import \{ fmt,[^}]*\} from './render.js';\n", app, re.M).group(0), '', app, 'import render у app.js')
 scents = {p.stem: data_uri(f'/assets/img/scents/{p.name}') for p in sorted((ROOT / 'assets/img/scents').glob('*.webp'))}
 img_map = ',\n'.join(f'  {k!r}: {v!r}' for k, v in scents.items())
 render = sub_once('const IMG = id => `/assets/img/scents/${id}.webp?v=${C.IMG_VERSION}`;',
