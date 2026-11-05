@@ -1,4 +1,4 @@
-import { CONFIG as C, GROUPS, SCENTS, calc } from './config.js';
+import { CONFIG as C, GROUPS, SCENTS, calc, calcCart, bundlePrice } from './config.js';
 import { fmt, plural, candles, hash, IMG, derive, setsHTML, groupsHTML, bundlesHTML } from './render.js';
 
 const $ = s => document.querySelector(s);
@@ -25,7 +25,7 @@ if (C.TIKTOK_PIXEL_ID) {
 /* ---------- pricing helpers ---------- */
 function upsell(n) {
   if (!n) return null;
-  const cur = calc(n), curPer = cur.total / n;
+  const cur = calcCart(cart), curPer = cur.total / n;
   const cands = [];
   for (let m = n + 1; m <= n + 5; m++) cands.push(m);
   const maxSet = C.SETS[0]?.qty;
@@ -91,7 +91,7 @@ const save = () => { try { localStorage.setItem(CART_KEY, JSON.stringify(cart));
 const count = () => Object.values(cart).reduce((a, b) => a + b, 0);
 
 function track(ev, extra, eventID) {
-  const n = count(), p = calc(n);
+  const n = count(), p = calcCart(cart);
   const per = n ? Math.round(p.total / n) : C.SINGLE_PRICE;
   const items = SCENTS.filter(s => cart[s.id]).map(s => ({ id: s.id, quantity: cart[s.id], item_price: per }));
   const d = Object.assign({ value: p.total, currency: 'UAH', content_type: 'product', num_items: n, content_name: `Свічки Zigriy ${C.VOLUME}`,
@@ -130,15 +130,18 @@ document.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.ma
 document.addEventListener('focusin', e => { if (e.target.matches('[data-qty]')) e.target.select(); });
 const setVal = (el, q) => { if (el && document.activeElement !== el) el.value = q; };
 
+// «Осінній набір: 1 200 грн» / «Осінній набір × 2: 2 400 грн» — набори зі своєю ціною, що застосувались у кошику
+const dealsText = p => (p.deals || []).map(d => `${d.n}${d.k > 1 ? ` × ${d.k}` : ''}: ${fmt(d.k * d.price)}`);
+
 function hintText(n) {
-  const u = upsell(n), p = calc(n);
+  const u = upsell(n), p = calcCart(cart);
   if (u) return u.cheaper ? `+${u.add} шт → ${u.m} за ${fmt(u.total)}, дешевше!` : `+${u.add} шт → ${u.m} за ${fmt(u.total)}`;
   if (p.total < C.FREE_SHIPPING_FROM) return `До безкоштовної доставки: ${fmt(C.FREE_SHIPPING_FROM - p.total)}`;
   return 'Безкоштовна доставка ✓';
 }
 
 function render() {
-  const n = count(), p = calc(n);
+  const n = count(), p = calcCart(cart);
   $$('.scent').forEach(el => {
     const q = cart[el.dataset.id] || 0;
     el.classList.toggle('in', q > 0);
@@ -156,7 +159,7 @@ function render() {
 }
 
 function renderModal() {
-  const n = count(), p = calc(n);
+  const n = count(), p = calcCart(cart);
   if (!n) { if (!sent) closeModal(); return; }
   $('#mLines').innerHTML = SCENTS.filter(s => cart[s.id]).map(s => `
     <div class="line"><div class="n">${s.n}</div>
@@ -171,7 +174,7 @@ function renderModal() {
 }
 
 function renderTotals() {
-  const n = count(), p = calc(n);
+  const n = count(), p = calcCart(cart);
   if (!n || !$('#modal').classList.contains('open')) return;
   const free = p.total >= C.FREE_SHIPPING_FROM;
   const ship = free ? '<span class="g">безкоштовно</span>'
@@ -180,6 +183,7 @@ function renderTotals() {
   $('#mTotals').innerHTML = `
     <div class="r"><span>${n} шт × ${C.SINGLE_PRICE} грн</span><span>${fmt(p.full)}</span></div>
     ${p.save ? `<div class="r g"><span>Знижка набору</span><span>−${fmt(p.save)}</span></div>` : ''}
+    ${dealsText(p).map(t => `<div class="r muted"><span>🍂 ${t}</span></div>`).join('')}
     <div class="r"><span>Доставка${NP.cityRef ? ` (${NP.type === 'P' ? 'поштомат' : 'відділення'})` : ''}</span>${ship}</div>
     ${!free && NP.price ? `<div class="r muted"><span>Орієнтовно, за тарифами Нової Пошти</span></div>` : ''}
     ${!free ? `<div class="r muted"><span>До безкоштовної доставки ще ${fmt(C.FREE_SHIPPING_FROM - p.total)}</span></div>` : ''}
@@ -233,9 +237,10 @@ document.addEventListener('keydown', e => {
 
 /* ---------- замовлення в Direct ---------- */
 function orderText() {
-  const n = count(), p = calc(n);
+  const n = count(), p = calcCart(cart);
   return [`Привіт! Хочу замовити свічки ${C.BRAND}:`,
     ...SCENTS.filter(s => cart[s.id]).map(s => `— ${s.n} × ${cart[s.id]}`),
+    ...dealsText(p),
     `Разом: ${n} шт, ${fmt(p.total)}`].join('\n');
 }
 let manualShown = false;
@@ -367,7 +372,7 @@ $$('input[name="npType"]').forEach(r => r.addEventListener('change', () => {
 
 // Орієнтовна вартість доставки з тарифів НП (лише коли доставка не безкоштовна)
 async function updatePrice() {
-  const n = count(), free = calc(n).total >= C.FREE_SHIPPING_FROM;
+  const n = count(), free = calcCart(cart).total >= C.FREE_SHIPPING_FROM;
   const key = NP.cityRef && n && !free ? `${NP.cityRef}|${NP.type}|${n}` : '';
   if (key === NP.priceKey) return;
   NP.priceKey = key; NP.price = null; renderTotals();
@@ -398,7 +403,7 @@ $('#orderForm').addEventListener('submit', async e => {
   if (!phone) return err('Введіть телефон у форматі +380XXXXXXXXX або 0XXXXXXXXX.');
   if (NP.manual ? !fCity.value.trim() : !NP.cityRef) return err(NP.manual ? 'Вкажіть місто.' : 'Оберіть місто зі списку підказок.');
   if (NP.manual ? !point : !NP.pointRef) return err(NP.manual ? `Вкажіть ${what} Нової Пошти.` : `Оберіть ${what} зі списку.`);
-  const free = calc(count()).total >= C.FREE_SHIPPING_FROM;
+  const free = calcCart(cart).total >= C.FREE_SHIPPING_FROM;
   err('');
   const btn = $('#orderBtn'), label = btn.textContent;
   btn.disabled = true; btn.textContent = 'Надсилаємо…';
@@ -503,13 +508,14 @@ $('#orderForm').addEventListener('submit', async e => {
 /* ---------- сторінка аромату: /aromat/<id> ---------- */
 const pv = $('#pv'), BASE_TITLE = document.title;
 let pvId = null, pvKind = 'aromat', pvQty = 1, pvFocus = null;
-// скільки лишилось до опівночі: ['05', '12', '33']
+// скільки лишилось до кінця тижня (неділя, 23:59:59): [дні, '05', '12', '33']
 function cdParts() {
-  const now = new Date(), end = new Date(now); end.setHours(23, 59, 59, 999);
+  const now = new Date(), end = new Date(now);
+  end.setDate(now.getDate() + (7 - now.getDay()) % 7); end.setHours(23, 59, 59, 999);
   const s = Math.max(0, Math.floor((end - now) / 1000));
-  return [Math.floor(s / 3600), Math.floor(s % 3600 / 60), s % 60].map(x => String(x).padStart(2, '0'));
+  return [Math.floor(s / 86400), ...[Math.floor(s % 86400 / 3600), Math.floor(s % 3600 / 60), s % 60].map(x => String(x).padStart(2, '0'))];
 }
-const cdLeft = () => cdParts().join(':');
+const cdLeft = () => { const [d, h, m, s] = cdParts(); return `${d ? `${d} ${plural(d, 'день', 'дні', 'днів')} ` : ''}${h}:${m}:${s}`; };
 const NOTE_ROWS = [['top', 'Верхні ноти', 0], ['mid', 'Середні ноти', 1], ['base', 'Базові ноти', 2]];
 const PV_EXTRA = { shokolad: ["/assets/img/gallery/shokolad-cozy.webp"] }; // додаткові фото аромату
 const ICO = {
@@ -670,7 +676,7 @@ function addBundle(id, q = 1) {
 }
 
 function renderBundle() {
-  const b = bundleOf(pvId), items = bItems(b), k = items.length, p = calc(k);
+  const b = bundleOf(pvId), items = bItems(b), k = items.length, p = bundlePrice(b);
   const names = items.map(s => s.n.toLowerCase());
   const list = `${names.slice(0, -1).join(', ')} і ${names[names.length - 1]}`;
   const collage = `<div class="bx-collage">${items.map(s => `<img src="${IMG(s.photo || s.id)}" alt="" width="800" height="800">`).join('')}<span class="bx-badge">${k} ${candles(k)}</span></div>`;
@@ -683,7 +689,7 @@ function renderBundle() {
     <div class="pv-main">
       ${galleryHTML(b.n, gal)}
       <div class="pv-info">
-        <p class="pv-group">${b.id === C.DEAL ? 'Набір дня' : 'Популярний набір'}${C.COUNTDOWN ? ' · ціна діє лише сьогодні' : ''}</p>
+        <p class="pv-group">${b.id === C.DEAL ? 'Набір тижня' : 'Популярний набір'}${C.COUNTDOWN ? ' · ціна діє до кінця тижня' : ''}</p>
         <h1 id="pvTitle" tabindex="-1">${b.n}</h1>
         <ul class="pv-chips"><li>${ico('jar')}${k} ${candles(k)}</li><li>${ico('volume')}${C.VOLUME} кожна</li><li>${ico('time')}горить ${C.BURN}</li></ul>
         <div class="pv-price"><b>${fmt(p.total)}</b>${p.save ? `<s>${fmt(p.full)}</s><span>економія ${fmt(p.save)}</span>` : ''}</div>
@@ -747,7 +753,7 @@ function openPage(kind, id, push = true) {
   if (push) { try { history.pushState({ pv: id, kind, d: ((history.state && history.state.d) || 0) + 1 }, '', `/${kind}/${id}`); } catch (e) {} }
   $('#pvTitle').focus({ preventScroll: true });
   const vc = kind === 'nabir'
-    ? { content_ids: s.items, content_name: s.n, content_type: 'product_group', value: calc(s.items.length).total, currency: 'UAH' }
+    ? { content_ids: s.items, content_name: s.n, content_type: 'product_group', value: bundlePrice(s).total, currency: 'UAH' }
     : { content_ids: [id], content_name: s.n, content_type: 'product', value: C.SINGLE_PRICE, currency: 'UAH' };
   try { window.fbq && fbq('track', 'ViewContent', vc); } catch (e) {}
 }
@@ -818,16 +824,17 @@ document.addEventListener('click', e => {
   if (ok) { try { history.replaceState({ pv: m[2], kind: m[1], d: 0 }, '', location.pathname); } catch (e) {} openPage(m[1], m[2], false); }
 }
 
-/* ---------- countdown: щодня до опівночі ---------- */
+/* ---------- countdown: щотижня до опівночі неділі ---------- */
 if (C.COUNTDOWN) {
   const deal = $('.tb-deal'); // таймер веде на набір DEAL; немає такого набору — просто таймер
   const db = bundleOf(C.DEAL);
   if (db) { deal.dataset.bundle = C.DEAL; deal.href = '/nabir/' + C.DEAL; $('#tbSetName').textContent = db.n.split(' ')[0] + ' ›'; }
   else { deal.removeAttribute('href'); delete deal.dataset.bundle; $$('.tb-set, .tb-sep').forEach(el => el.remove()); }
   const tick = () => {
-    const [h, m, s] = cdParts();
+    const [d, h, m, s] = cdParts();
+    $('#cdD').textContent = String(d).padStart(2, '0'); $('#cdDl').textContent = plural(d, 'день', 'дні', 'днів');
     $('#cdH').textContent = h; $('#cdM').textContent = m; $('#cdS').textContent = s;
-    $$('[data-cd]').forEach(el => (el.textContent = `${h}:${m}:${s}`));
+    $$('[data-cd]').forEach(el => (el.textContent = cdLeft()));
   };
   // при прокрутці таймер стає компактним. Пороги різні (згортаємо після 140px, розгортаємо вище 40px),
   // а місце під смужку не змінюється, тож вона більше не «смикається» туди-сюди

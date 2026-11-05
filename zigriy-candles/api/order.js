@@ -3,7 +3,7 @@
 //   TELEGRAM_BOT_TOKEN — токен бота від @BotFather
 //   TELEGRAM_CHAT_ID   — ID чату/групи (можна кілька через кому)
 
-import { CONFIG, SCENTS, calc } from '../assets/js/config.js';
+import { CONFIG, SCENTS, calcCart } from '../assets/js/config.js';
 
 const esc = s => String(s ?? '').replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
 const clip = (s, n = 200) => String(s ?? '').trim().slice(0, n);
@@ -45,12 +45,14 @@ export default async function handler(req, res) {
   for (const it of Array.isArray(b.items) ? b.items : []) {
     const s = SCENTS.find(x => x.id === it?.id);
     const qty = Math.floor(Number(it?.qty));
-    if (s && qty > 0 && qty <= CONFIG.MAX_PER_SCENT) items.push({ name: s.n, qty });
+    if (s && qty > 0 && qty <= CONFIG.MAX_PER_SCENT) items.push({ id: s.id, name: s.n, qty });
   }
   const n = items.reduce((a, i) => a + i.qty, 0);
   if (!n) return res.status(400).json({ ok: false, error: 'Empty cart' });
   if (n > CONFIG.MAX_ORDER) return res.status(400).json({ ok: false, error: 'Too many items' });
-  const p = calc(n);
+  const byId = {};
+  for (const i of items) byId[i.id] = (byId[i.id] || 0) + i.qty;
+  const p = calcCart(byId); // з урахуванням наборів зі своєю ціною
   const free = p.total >= CONFIG.FREE_SHIPPING_FROM;
 
   const orderId = /^[A-Z0-9-]{3,20}$/.test(b.orderId) ? b.orderId : 'Z-' + Date.now().toString(36).toUpperCase().slice(-6);
@@ -62,6 +64,7 @@ export default async function handler(req, res) {
     `🕯 <b>Нове замовлення ${esc(orderId)}</b>`,
     '',
     ...items.map(i => `• ${esc(i.name)} × ${i.qty}`),
+    ...p.deals.map(d => `🍂 ${esc(d.n)}${d.k > 1 ? ` × ${d.k}` : ''}: ${fmt(d.k * d.price)}`),
     `Разом: ${n} шт — <b>${fmt(p.total)}</b>${p.save ? ` (знижка ${fmt(p.save)})` : ''}`,
     `Доставка: ${free ? 'безкоштовно' : `за тарифами НП${order.delivery ? ` (${esc(order.delivery)}, орієнтовно)` : ''}`}`,
     '',

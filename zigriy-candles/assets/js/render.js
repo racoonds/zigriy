@@ -1,6 +1,6 @@
 /* Спільна розмітка для сайту (app.js) і для prerender-скрипта (scripts/prerender.mjs):
    ціни, набори й картки ароматів потрапляють у HTML ще до запуску JS. */
-import { CONFIG as C, GROUPS, SCENTS, calc } from './config.js';
+import { CONFIG as C, GROUPS, SCENTS, calc, bundlePrice } from './config.js';
 
 export const fmt = n => n.toLocaleString('uk-UA').replace(/[\s,]/g, ' ') + ' грн';
 export const plural = (n, one, few, many) => {
@@ -48,11 +48,11 @@ export function setsHTML() {
 // картки готових наборів (секція «Популярні набори» і «Інші набори» на сторінці набору)
 export function bundlesHTML(skip) {
   return (C.BUNDLES || []).filter(b => b.id !== skip).map(b => {
-    const items = b.items.map(id => SCENTS.find(s => s.id === id)).filter(Boolean), p = calc(items.length);
+    const items = b.items.map(id => SCENTS.find(s => s.id === id)).filter(Boolean), p = bundlePrice(b);
     const deal = C.COUNTDOWN && b.id === C.DEAL;
     return `
     <article class="bundle${deal ? ' deal' : ''}">
-      <a class="bd-pics" href="/nabir/${b.id}" data-bundle="${b.id}" aria-label="${b.n}: склад і ціна">${items.map(s => `<img src="${IMG(s.photo || s.id)}" alt="" loading="lazy" width="800" height="800">`).join('')}<span class="bd-tag">${deal ? 'Набір дня' : `${items.length} ${candles(items.length)}`}</span></a>
+      <a class="bd-pics" href="/nabir/${b.id}" data-bundle="${b.id}" aria-label="${b.n}: склад і ціна">${items.map(s => `<img src="${IMG(s.photo || s.id)}" alt="" loading="lazy" width="800" height="800">`).join('')}<span class="bd-tag">${deal ? 'Набір тижня' : `${items.length} ${candles(items.length)}`}</span></a>
       <div class="bd-body">
         <h3><a href="/nabir/${b.id}" data-bundle="${b.id}">${b.n}</a></h3>
         <p class="bd-sub">${b.t || ''}</p>

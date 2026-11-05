@@ -462,10 +462,26 @@ body.pv-open .cartbar{display:none}
 .topbar.compact .tb-set{height:34px}
 .topbar.compact .tb-set small{max-height:0;opacity:0}
 .topbar.compact .tb-sep{margin:2px 10px}
-@media(max-width:380px){.tb-sep{margin-left:6px;margin-right:6px}.tb-set{padding:0 9px 0 7px}.tb-set .ic{font-size:17px}}
+/* телефон: 4 клітинки таймера + кнопка набору в один рядок */
+@media(max-width:520px){
+  .timer{gap:3px}
+  .timer .u{min-width:44px}
+  .timer .n{font-size:22px;padding:9px 4px}
+  .timer .l{font-size:9px;letter-spacing:.04em}
+  .timer .c{font-size:20px;padding-top:9px}
+  .tb-sep{margin:2px 6px 16px}
+  .tb-set{height:42px;padding:0 9px 0 7px;gap:5px}
+  .tb-set .ic{font-size:16px}
+  .tb-set b{font-size:12px}
+  .tb-set small{font-size:11px}
+  .topbar.compact .timer .n{font-size:18px;padding:5px 4px}
+  .topbar.compact .timer .c{font-size:17px;padding-top:4px}
+  .topbar.compact .tb-sep{margin:2px 6px}
+}
+@media(max-width:374px){.tb-set .ic{display:none}}
+@media(max-width:340px){.timer .u{min-width:40px}.tb-sep{margin-left:4px;margin-right:4px}}
 @media(prefers-reduced-motion:no-preference){.tb-set{animation:dealPulse 2.4s ease-in-out infinite}}
 @keyframes dealPulse{0%,100%{box-shadow:0 0 0 0 rgba(242,202,90,.55)}50%{box-shadow:0 0 0 6px rgba(242,202,90,0)}}
-@media(max-width:359px){.timer .u{min-width:52px}.timer .n{font-size:24px}}
 /* сторінка набору */
 .bx-collage{position:relative;width:100%;height:100%;display:grid;grid-template-columns:1.25fr 1fr;grid-template-rows:1fr 1fr;gap:3px;background:var(--bg)}
 .bx-collage img{width:100%;height:100%;object-fit:cover;min-height:0}

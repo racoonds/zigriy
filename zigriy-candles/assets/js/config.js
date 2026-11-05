@@ -31,13 +31,15 @@ export const CONFIG = {
   FREE_SHIPPING_FROM: 1200,
   MAX_ORDER: 1000,           // більше свічок в одному замовленні з сайту — тільки через Direct
   MAX_PER_SCENT: 999,        // скільки свічок одного аромату можна вписати
-  COUNTDOWN: true,           // таймер «ціни діють лише сьогодні» у шапці, щодня до опівночі
+  COUNTDOWN: true,           // таймер «ціни на набори діють до кінця тижня» у шапці, щотижня до опівночі неділі
 
   // Готові набори: секція «Популярні набори» на головній і сторінка /nabir/<id>.
   // «Додати набір» кладе в кошик по одній свічці кожного аромату, ціна рахується як звичайний набір (3 свічки = ціна набору на 3).
-  // t — короткий підпис у картці, d — опис на сторінці набору. Після змін запустіть node scripts/prerender.mjs
+  // t — короткий підпис у картці, d — опис на сторінці набору.
+  // price — своя ціна набору (необовʼязково): діє, щойно в кошику є всі його аромати, навіть додані поштучно;
+  // сайт і сервер беруть найвигідніший для покупця варіант. Після змін запустіть node scripts/prerender.mjs
   BUNDLES: [
-    { id: 'osinnii', n: 'Осінній набір', items: ['pryanyi-apelsyn', 'teplyi-kruasan', 'harbuzovyi-pyrih'],
+    { id: 'osinnii', n: 'Осінній набір', items: ['pryanyi-apelsyn', 'teplyi-kruasan', 'harbuzovyi-pyrih'], price: 1200,
       t: 'Цитрус із прянощами, тепла здоба й гарбузова випічка',
       d: 'Три найпопулярніші осінні аромати в одному наборі: цитрусово-пряний апельсин, тепла здоба з медом і гарбузова випічка з корицею. Запалюйте під настрій або подаруйте комусь трохи осіннього затишку.' },
     { id: 'solodkyi', n: 'Солодкий набір', items: ['shokolad', 'vanil', 'osinnii-krem'],
@@ -80,4 +82,37 @@ export function calc(n) {
   total += rest * CONFIG.SINGLE_PRICE;
   const full = n * CONFIG.SINGLE_PRICE;
   return { n, total, full, save: full - total, parts, singles: rest };
+}
+
+/* Ціна готового набору: своя (price) або як звичайний набір на стільки ж свічок. */
+export function bundlePrice(b) {
+  const k = b.items.length, full = k * CONFIG.SINGLE_PRICE;
+  if (!b.price) return calc(k);
+  return { n: k, total: b.price, full, save: full - b.price };
+}
+
+/* Ціна кошика { id: кількість } з урахуванням наборів зі своєю ціною.
+   Перебираємо, скільки таких наборів «зібрати» з кошика (0…максимум), решта — за звичайними цінами,
+   і беремо найменшу суму. deals — які набори застосувались: [{ id, n, k, price }]. */
+export function calcCart(cart) {
+  const n = Object.values(cart).reduce((a, q) => a + (q > 0 ? q : 0), 0);
+  const priced = (CONFIG.BUNDLES || []).filter(b => b.price);
+  let best = null;
+  const go = (i, left, rest, acc, deals) => {
+    if (i === priced.length) {
+      const total = acc + calc(rest).total;
+      if (!best || total < best.total) best = { total, deals };
+      return;
+    }
+    const b = priced[i], max = Math.min(...b.items.map(id => left[id] || 0));
+    for (let k = 0; k <= max; k++) {
+      const l2 = { ...left };
+      b.items.forEach(id => (l2[id] = (l2[id] || 0) - k));
+      go(i + 1, l2, rest - k * b.items.length, acc + k * b.price, k ? [...deals, { id: b.id, n: b.n, k, price: b.price }] : deals);
+    }
+  };
+  go(0, cart, n, 0, []);
+  const base = calc(n), full = n * CONFIG.SINGLE_PRICE;
+  if (best.total >= base.total) return { ...base, deals: [] };
+  return { n, total: best.total, full, save: full - best.total, deals: best.deals };
 }
