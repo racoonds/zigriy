@@ -448,3 +448,36 @@ body.pv-open .cartbar{display:none}
 .pv-rel{scroll-padding:0 max(16px,env(safe-area-inset-left))}
 /* компʼютер: 7 ароматів в один ряд на всю ширину; якщо ароматів стане більше — гортається стрілками */
 @media(min-width:860px){.pv-rel{display:grid;grid-auto-flow:column;grid-auto-columns:calc((100% - 72px) / 7);gap:12px;margin:0;padding:2px 0 8px;scroll-padding:0}.pv-card{flex:none;min-width:0}}
+/* таймер у шапці — посилання на набір дня */
+.tb-deal{display:block;color:inherit;text-decoration:none;border-radius:12px;-webkit-tap-highlight-color:transparent}
+.tb-deal:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+.timer .go .n{background:linear-gradient(180deg,var(--gold),var(--gold2));border-color:var(--gold);font-size:22px;padding:10px 8px 9px;transition:transform .15s}
+.timer .go .l{opacity:1;color:var(--gold);font-weight:900}
+.tb-deal:hover .go .n{transform:translateY(-1px)}
+.topbar.compact .timer .go .n{font-size:17px;padding:7px 8px 6px}
+@media(prefers-reduced-motion:no-preference){.timer .go .n{animation:dealPulse 2.4s ease-in-out infinite}}
+@keyframes dealPulse{0%,100%{box-shadow:0 0 0 0 rgba(242,202,90,.55)}50%{box-shadow:0 0 0 6px rgba(242,202,90,0)}}
+@media(max-width:359px){.timer .u{min-width:52px}.timer .n{font-size:24px}}
+/* сторінка набору */
+.bx-collage{position:relative;width:100%;height:100%;display:grid;grid-template-columns:1.25fr 1fr;grid-template-rows:1fr 1fr;gap:3px;background:var(--bg)}
+.bx-collage img{width:100%;height:100%;object-fit:cover;min-height:0}
+.bx-collage img:first-child{grid-row:span 2}
+.bx-badge{position:absolute;left:12px;top:12px;background:var(--brown-d);color:var(--gold);font-weight:900;font-size:13px;padding:6px 12px;border-radius:99px}
+.pv-price s{font-size:18px;font-weight:700;color:var(--ink2)}
+.bx-cd{margin:0;display:inline-flex;align-items:center;gap:6px;justify-self:start;background:var(--dark);color:#f6e9d6;font-size:14px;font-weight:700;padding:8px 14px;border-radius:99px}
+.bx-cd b{color:var(--gold);font-weight:900;font-variant-numeric:tabular-nums}
+.pv-buy #pvAdd{white-space:nowrap}
+.bx-items{display:grid;gap:12px}
+@media(min-width:760px){.bx-items{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.bx-item{display:grid;align-items:start;grid-template-columns:104px 1fr;gap:14px;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:12px}
+@media(min-width:760px){.bx-item{grid-template-columns:1fr;padding:12px 12px 16px}}
+.bx-img{display:block}
+.bx-img img{width:100%;height:auto;aspect-ratio:1/1;object-fit:cover;border-radius:12px;background:#efe2cf}
+.bx-txt{display:grid;gap:6px;align-content:start;min-width:0}
+.bx-txt h3{font-size:17px;margin:0;color:var(--brown-d)}
+.bx-txt h3 a{text-decoration:none}
+.bx-txt p{margin:0;font-size:14px;line-height:1.45;color:var(--ink2)}
+.bx-notes{list-style:none;display:flex;flex-wrap:wrap;gap:5px;padding:0;margin:2px 0 0}
+.bx-notes li{background:var(--bg2);border:1px solid var(--line);border-radius:99px;padding:3px 9px;font-size:12.5px;font-weight:600}
+.bx-more{font-size:14px;font-weight:800;color:var(--brown);text-decoration:none;margin-top:2px}
+.bx-more:hover,.bx-txt h3 a:hover{text-decoration:underline}

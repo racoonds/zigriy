@@ -1,7 +1,10 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "cleanUrls": true,
-  "rewrites": [{ "source": "/aromat/:id", "destination": "/" }],
+  "rewrites": [
+    { "source": "/aromat/:id", "destination": "/" },
+    { "source": "/nabir/:id", "destination": "/" }
+  ],
   "functions": {
     "api/order.js": { "maxDuration": 10 },
     "api/np.js": { "maxDuration": 10 }
